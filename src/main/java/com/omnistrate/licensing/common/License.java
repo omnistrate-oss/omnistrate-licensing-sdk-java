@@ -157,6 +157,15 @@ public class License {
                 id, creationTime, expirationTime, description, instanceID, subscriptionID, sku, version);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof License)) {
+            return false;
+        }
+        License other = (License) obj;
+        return id.equals(other.id) && creationTime.equals(other.creationTime) && expirationTime.equals(other.expirationTime) && description.equals(other.description) && instanceID.equals(other.instanceID) && subscriptionID.equals(other.subscriptionID) && sku.equals(other.sku) && version == other.version;
+    }
+
     public static License parse(String s) throws Exception {
         return mapper.readValue(s, License.class);
     }

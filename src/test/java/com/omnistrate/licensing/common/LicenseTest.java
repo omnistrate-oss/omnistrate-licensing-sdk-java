@@ -103,6 +103,19 @@ public class LicenseTest {
         assertEquals(1, license.getVersion());
     }
 
+    @Test   
+    public void testSerialize() {
+        License license = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        String jsonString = license.toString();
+        assertNotNull(jsonString);
+        try {
+            License license2 = License.parse(jsonString);
+            assertEquals(license, license2);
+        } catch (Exception e) {
+            fail("Should not throw an exception");
+        }
+    }
+
     @Test
     public void testIsValidWithSKU() {
         License validLicense = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.parse("2021-01-01T00:00:00Z"), ZonedDateTime.parse("2022-01-01T00:00:00Z"));
