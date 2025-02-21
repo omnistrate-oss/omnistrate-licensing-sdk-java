@@ -29,8 +29,12 @@
     </developer>
   </developers>
 
+
   <scm>
-    <url>scm:git:git@github.com:omnistrate-oss/omnistrate-licensing-sdk-java.git</url>
+    <url>https://github.com/omnistrate-oss/omnistrate-licensing-sdk-java</url>
+    <connection>scm:git:https://github.com/omnistrate-oss/omnistrate-licensing-sdk-java.git</connection>
+    <developerConnection>scm:git:git@github.com:omnistrate-oss/omnistrate-licensing-sdk-java.git</developerConnection>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
