@@ -1,7 +1,7 @@
 # Omnistrate Licensing SDK for Java
 
 ![CI](https://github.com/omnistrate-oss/omnistrate-licensing-sdk-java/actions/workflows/build.yml/badge.svg) 
-![CodeQL](https://github.com/omnistrate-oss/omnistrate-licensing-sdk-java/actions/workflows/codeql.yml/badge.svg)
+![CodeQL](https://github.com/omnistrate-oss/omnistrate-licensing-sdk-java/actions/workflows/github-code-scanning/codeql/badge.svg)
 
 ## Overview
 
