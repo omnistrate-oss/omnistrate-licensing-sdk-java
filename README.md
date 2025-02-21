@@ -71,7 +71,7 @@ import com.omnistrate.licensing.validation.Validator;
 public class Main {
     public static void main(String[] args) {
         try {
-            boolean isValid = Validator.validateLicenseForProduct("product-id");
+            boolean isValid = Validator.validateLicenseForProduct("[SKU]");
             if (isValid) {
                 System.out.println("License validation for product succeeded");
             } else {
