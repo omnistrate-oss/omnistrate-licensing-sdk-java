@@ -123,13 +123,7 @@ public class CertificateUtilsTest {
             byte[] dataBytes = data.getBytes();
 
             // Load private key
-            String privateKeyPEM = TEST_PRIVATE_KEY.replace("-----BEGIN RSA PRIVATE KEY-----", "")
-                .replace("-----END RSA PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
-            byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyPEM);
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
+            PrivateKey privateKey = CertificateUtils.loadPrivateKeyFromString(TEST_PRIVATE_KEY);
 
             // Sign data
             byte[] signature = CertificateUtils.sign(privateKey, dataBytes);

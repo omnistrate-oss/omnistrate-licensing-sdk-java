@@ -8,6 +8,11 @@ public class InvalidLicenseException extends Exception {
         this.reason = reason;
     }
 
+    public InvalidLicenseException(String reason, Throwable cause) {
+        super(reason, cause);
+        this.reason = reason;
+    }
+
     public String getReason() {
         return reason;
     }

@@ -1,13 +1,19 @@
 package com.omnistrate.licensing.certificate;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -29,10 +35,12 @@ import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
 import java.security.cert.CertPathBuilderException;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.omnistrate.licensing.common.InvalidCertificateException;
+import com.omnistrate.licensing.common.InvalidPrivateKeyException;
 
 public class CertificateUtils {
 
@@ -62,14 +70,29 @@ public class CertificateUtils {
         return loadCertificateFromBytes(certString.getBytes());
     }
 
-    public static PrivateKey loadPrivateKeyFromBytes(byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePrivate(keySpec);
+    public static PrivateKey loadPrivateKeyFromBytes(byte[] pemContent) throws InvalidPrivateKeyException {
+        try {
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pemContent);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+            return keyFactory.generatePrivate(keySpec);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new InvalidPrivateKeyException("Failed to load private key: RSA algorithm not found", ex);
+        } catch (NoSuchProviderException ex) {
+            throw new InvalidPrivateKeyException("Failed to load private key: Bouncy Castle provider not found", ex);
+        } catch (InvalidKeySpecException ex) {
+            throw new InvalidPrivateKeyException("Failed to load private key: Invalid key spec", ex);
+        }
     }
 
-    public static PrivateKey loadPrivateKeyFromString(String keyString) throws Exception {
-        return loadPrivateKeyFromBytes(keyString.getBytes());
+    public static PrivateKey loadPrivateKeyFromString(String keyString) throws InvalidPrivateKeyException {
+        try {
+            PemReader pemReader = new PemReader(new StringReader(keyString));
+            PemObject pemObject = pemReader.readPemObject();
+            byte[] pemContent = pemObject.getContent();
+            return loadPrivateKeyFromBytes(pemContent);
+        } catch (IOException e) {
+            throw new InvalidPrivateKeyException("Failed to load private key from string", e);
+        }
     }
 
     public static byte[] sign(PrivateKey key, byte[] data) throws Exception {
