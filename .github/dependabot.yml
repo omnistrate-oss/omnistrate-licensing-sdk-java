@@ -5,7 +5,6 @@
 
 version: 2
 updates:  
-
   - package-ecosystem: "github-actions"
     # Workflow files stored in the default location of `.github/workflows`. (You don't need to specify `/.github/workflows` for `directory`. You can use `directory: "/"`.)
     directory: "/"
@@ -17,3 +16,15 @@ updates:
         update-types:
         - "minor"
         - "patch"
+        
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      maven-dependencies:
+        patterns:
+          - "org.apache.*"
+          - "com.fasterxml.jackson.*"
+          - "org.springframework.*"
