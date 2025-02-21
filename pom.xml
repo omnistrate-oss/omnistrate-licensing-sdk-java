@@ -20,8 +20,8 @@
   <distributionManagement>
     <repository>
       <id>github</id>
-      <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/omnistrate/omnistrate-licensing-sdk-java</url>
+      <name>GitHub Omnistrate OSS Packages</name>
+      <url>https://maven.pkg.github.com/omnistrate-oss/omnistrate-licensing-sdk-java</url>
     </repository>
   </distributionManagement>
 
@@ -34,7 +34,7 @@
     <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>2.18.2</version>
+        <version>2.18.1</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -56,41 +56,41 @@
         <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
-          <version>3.4.1</version>
+          <version>3.1.0</version>
         </plugin>
         <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.3.1</version>
+          <version>3.0.2</version>
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.13.0</version>
+          <version>3.8.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.2</version>
+          <version>2.22.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.4.2</version>
+          <version>3.0.2</version>
         </plugin>
         <plugin>
           <artifactId>maven-install-plugin</artifactId>
-          <version>3.1.3</version>
+          <version>2.5.2</version>
         </plugin>
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>3.1.3</version>
+          <version>2.8.2</version>
         </plugin>
         <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.21.0</version>
+          <version>3.7.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.8.0</version>
+          <version>3.0.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -98,7 +98,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.11.2</version>
+        <version>3.3.1</version>
         <configuration>
           <source>1.8</source>
         </configuration>
@@ -106,7 +106,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>3.2.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -119,7 +119,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>2.22.2</version>
       </plugin>
     </plugins>
   </build>
