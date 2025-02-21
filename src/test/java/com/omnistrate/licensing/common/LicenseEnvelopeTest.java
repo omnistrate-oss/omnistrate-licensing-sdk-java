@@ -68,12 +68,12 @@ public class LicenseEnvelopeTest {
     }
 
     @Test
-    public void testEncodeBase64() {
+    public void testToBase64() {
         License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
-        String encoded = le.encodeBase64();
+        String encoded = le.toBase64();
         assertNotNull(encoded);
 
         byte[] decoded = Base64.getDecoder().decode(encoded);
@@ -112,7 +112,7 @@ public class LicenseEnvelopeTest {
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
-        String encoded = le.encodeBase64();
+        String encoded = le.toBase64();
         LicenseEnvelope decodedLe = LicenseEnvelope.parseBase64(encoded);
         assertNotNull(decodedLe);
         assertEquals(le.getLicense(), decodedLe.getLicense());

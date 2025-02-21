@@ -70,7 +70,7 @@ public class LicenseEnvelope {
         return license.equals(other.license) && signature.equals(other.signature);
     }
 
-    public String encodeBase64() {
+    public String toBase64() {
         try {
             return Base64.getEncoder().encodeToString(toBytes());
         } catch (Exception e) {
