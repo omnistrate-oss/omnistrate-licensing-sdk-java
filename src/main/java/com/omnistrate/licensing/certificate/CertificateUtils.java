@@ -117,7 +117,7 @@ public class CertificateUtils {
         return sig.verify(signature);
     }
 
-   public static void verifyCertificate(X509Certificate cert, String dnsName, ZonedDateTime currentTime) throws InvalidCertificateException {
+   public static boolean verifyCertificate(X509Certificate cert, String dnsName, ZonedDateTime currentTime) throws InvalidCertificateException {
         // Check certificate validity date
         try {
             cert.checkValidity(java.util.Date.from(currentTime.toInstant()));
@@ -183,5 +183,7 @@ public class CertificateUtils {
         if (!domainValid) {
             throw new InvalidCertificateException("Certificate is not valid for the specified domain: " + dnsName);
         }
+
+        return true;
     }
 }

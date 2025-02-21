@@ -6,7 +6,7 @@ on:
 
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
 
     permissions:
@@ -23,7 +23,7 @@ jobs:
             java-version: '11'
             distribution: 'temurin'
             architecture: x64
-            
+
         - name: Publish package
           run: mvn --batch-mode deploy
           env:

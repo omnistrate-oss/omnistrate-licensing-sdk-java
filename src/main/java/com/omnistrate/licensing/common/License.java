@@ -96,17 +96,17 @@ public class License {
     }
 
     public boolean isValid(String sku, String instanceID) throws InvalidLicenseException {
-        if (isNullOrEmpty(id) || isNullOrEmpty(creationTime) || isNullOrEmpty(expirationTime)) {
+        if (Utils.isNullOrEmpty(id) || Utils.isNullOrEmpty(creationTime) || Utils.isNullOrEmpty(expirationTime)) {
             throw new InvalidLicenseException("Missing required fields");
         }
 
-        if (!isNullOrEmpty(sku)) {
+        if (!Utils.isNullOrEmpty(sku)) {
             if (!sku.equals("" + this.sku)) {
                 throw new InvalidLicenseException("Invalid SKU expected " + this.sku + " got " + sku);
             }
         }
 
-        if (!isNullOrEmpty(instanceID)) {
+        if (!Utils.isNullOrEmpty(instanceID)) {
             if (!instanceID.equals("" + this.instanceID)) {
                 throw new InvalidLicenseException("Invalid instance ID expected " + this.instanceID + " got " + instanceID);
             }
@@ -168,9 +168,5 @@ public class License {
 
     public static License parse(String s) throws Exception {
         return mapper.readValue(s, License.class);
-    }
-
-    private boolean isNullOrEmpty(String s) {
-        return s == null || s.isEmpty();
     }
 }

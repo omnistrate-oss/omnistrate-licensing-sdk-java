@@ -14,6 +14,17 @@ public class ValidatorConfigTest {
         assertEquals(DEFAULT_CERT_PATH, config.getCertPath());
         assertEquals(DEFAULT_LICENSE_PATH, config.getLicensePath());
         assertEquals("", config.getInstanceID());
+
+        config = new ValidatorConfig("", "", "");
+        assertEquals(DEFAULT_CERT_PATH, config.getCertPath());
+        assertEquals(DEFAULT_LICENSE_PATH, config.getLicensePath());
+        assertEquals("", config.getInstanceID());
+
+
+        config = new ValidatorConfig("instance-id", "", "");
+        assertEquals(DEFAULT_CERT_PATH, config.getCertPath());
+        assertEquals(DEFAULT_LICENSE_PATH, config.getLicensePath());
+        assertEquals("instance-id", config.getInstanceID());
     }
 
     @Test
@@ -27,20 +38,18 @@ public class ValidatorConfigTest {
     @Test
     public void testValidatorConfigIsValid() {
         ValidatorConfig config = new ValidatorConfig("", "", "");
-        assertFalse(config.isValid());
+        assertTrue(config.isValid());
 
         config = new ValidatorConfig("", "/custom/cert/path", "");
-        assertFalse(config.isValid());
+        assertTrue(config.isValid());
 
         config = new ValidatorConfig("instance-id", "", "");
-        assertFalse(config.isValid());
+        assertTrue(config.isValid());
 
         config = new ValidatorConfig("instance-id", "/custom/cert/path", "");
-        assertFalse(config.isValid());
+        assertTrue(config.isValid());
 
         config = new ValidatorConfig("instance-id", "/custom/cert/path", "/custom/license/path");
         assertTrue(config.isValid());
-
-
     }
 }

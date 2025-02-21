@@ -1,5 +1,7 @@
 package com.omnistrate.licensing.validator;
 
+import com.omnistrate.licensing.common.Utils;
+
 public class ValidatorConfig {
 
     public static final String DEFAULT_CERT_PATH = "/var/subscription/license.crt";
@@ -13,19 +15,29 @@ public class ValidatorConfig {
     private String instanceID;
 
     public ValidatorConfig(String instanceID, String certPath, String licensePath) {
-        this.instanceID = instanceID;
-        this.certPath = certPath;
-        this.licensePath = licensePath;
+        if (Utils.isNullOrEmpty(instanceID)) {
+           this.instanceID = Utils.getEnvOrDefault(INSTANCE_ID_ENV, "");
+        } else {
+            this.instanceID = instanceID;
+        }
+        if (Utils.isNullOrEmpty(certPath)) {
+            this.certPath = Utils.getEnvOrDefault(CERT_PATH_ENV, DEFAULT_CERT_PATH);
+        } else {
+            this.certPath = certPath;
+        }
+        if (Utils.isNullOrEmpty(licensePath)) {
+            this.licensePath = Utils.getEnvOrDefault(LICENSE_PATH_ENV, DEFAULT_LICENSE_PATH);
+        } else {
+            this.licensePath = licensePath;
+        }
     }
 
     public ValidatorConfig() {
-        this.instanceID = getEnvOrDefault(INSTANCE_ID_ENV, "");
-        this.certPath = getEnvOrDefault(CERT_PATH_ENV, DEFAULT_CERT_PATH);
-        this.licensePath = getEnvOrDefault(LICENSE_PATH_ENV, DEFAULT_LICENSE_PATH);
+        this("", "", "");
     }
 
     public boolean isValid() {
-        if (isNullOrEmpty(certPath) || isNullOrEmpty(licensePath)) {
+        if (Utils.isNullOrEmpty(certPath) || Utils.isNullOrEmpty(licensePath)) {
             return false;
         }
         return true;
@@ -43,15 +55,4 @@ public class ValidatorConfig {
         return instanceID;
     }
 
-    private static String getEnvOrDefault(String key, String defaultValue) {
-        String envValue = System.getenv(key);
-        if (isNullOrEmpty(envValue)) {
-            return defaultValue;
-        }
-        return envValue;
-    }
-
-    private static boolean isNullOrEmpty(String value) {
-        return value == null || value.isEmpty();
-    }
 }
