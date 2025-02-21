@@ -3,9 +3,14 @@ package com.omnistrate.licensing.certificate;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateExpiredException;
@@ -17,6 +22,7 @@ import java.security.cert.CertPathValidator;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.CertStore;
+import java.security.cert.CertificateException;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
@@ -27,21 +33,19 @@ import java.util.Set;
 
 public class CertificateUtils {
 
-
-
-    public static X509Certificate loadCertificate(String certPath) throws Exception {
+    public static X509Certificate loadCertificate(String certPath) throws CertificateException, FileNotFoundException, IOException {
         try (FileInputStream fis = new FileInputStream(new File(certPath))) {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             return (X509Certificate) cf.generateCertificate(fis);
         }
     }
 
-    public static X509Certificate loadCertificateFromBytes(byte[] certBytes) throws Exception {
+    public static X509Certificate loadCertificateFromBytes(byte[] certBytes) throws CertificateException {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certBytes));
     }
 
-    public static X509Certificate loadCertificateFromString(String certString) throws Exception {
+    public static X509Certificate loadCertificateFromString(String certString) throws CertificateException {
         return loadCertificateFromBytes(certString.getBytes());
     }
 
@@ -52,22 +56,16 @@ public class CertificateUtils {
         return signature.sign();
     }
 
-    public static void verifySignature(X509Certificate cert, byte[] signature, byte[] data) throws Exception {
+    public static boolean verifySignature(X509Certificate cert, byte[] signature, byte[] data) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException {
         PublicKey publicKey = cert.getPublicKey();
         Signature sig = Signature.getInstance("SHA256withRSA");
         sig.initVerify(publicKey);
         sig.update(data);
-        if (!sig.verify(signature)) {
-            throw new Exception("Signature verification failed");
-        }
+        return sig.verify(signature);
     }
 
     public static void verifyCertificate(X509Certificate cert, String dnsName, ZonedDateTime currentTime) throws Exception {
-        try {
-            cert.checkValidity(java.util.Date.from(currentTime.toInstant()));
-        } catch (CertificateExpiredException | CertificateNotYetValidException e) {
-            throw new Exception("Certificate is not valid at the current time", e);
-        }
+        cert.checkValidity(java.util.Date.from(currentTime.toInstant()));
 
         Set<TrustAnchor> trustAnchors = new HashSet<>();
         // Add CA and intermediate certificates to trustAnchors
