@@ -29,6 +29,14 @@
     </developer>
   </developers>
 
+
+  <scm>
+    <url>https://github.com/omnistrate-oss/omnistrate-licensing-sdk-java</url>
+    <connection>scm:git:https://github.com/omnistrate-oss/omnistrate-licensing-sdk-java.git</connection>
+    <developerConnection>scm:git:git@github.com:omnistrate-oss/omnistrate-licensing-sdk-java.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
