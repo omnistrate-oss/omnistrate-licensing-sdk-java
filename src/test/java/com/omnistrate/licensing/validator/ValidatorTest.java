@@ -1,8 +1,6 @@
 package com.omnistrate.licensing.validator;
 
 import com.omnistrate.licensing.certificate.CertificateUtils;
-import com.omnistrate.licensing.common.InvalidCertificateException;
-import com.omnistrate.licensing.common.InvalidLicenseException;
 import com.omnistrate.licensing.common.InvalidSignatureException;
 import com.omnistrate.licensing.common.License;
 import com.omnistrate.licensing.common.LicenseEnvelope;
