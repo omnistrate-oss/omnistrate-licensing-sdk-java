@@ -3,6 +3,7 @@ package com.omnistrate.licensing.validator;
 import com.omnistrate.licensing.certificate.CertificateUtils;
 import com.omnistrate.licensing.common.InvalidCertificateException;
 import com.omnistrate.licensing.common.InvalidLicenseException;
+import com.omnistrate.licensing.common.InvalidSignatureException;
 import com.omnistrate.licensing.common.License;
 import com.omnistrate.licensing.common.LicenseEnvelope;
 import com.omnistrate.licensing.common.Utils;
@@ -10,9 +11,12 @@ import com.omnistrate.licensing.common.Utils;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class Validator {
+
+    private final static String SIGNING_CERTIFICATE_VALID_DNS_NAME = "licensing.omnistrate.cloud";
 
     private X509Certificate cert;
 
@@ -32,7 +36,7 @@ public class Validator {
         this(config.getCertPath());
     }
     
-    public boolean validateLicense(LicenseEnvelope envelope, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, Exception {
+    public boolean validateLicense(LicenseEnvelope envelope, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         if (cert == null) {
             throw new InvalidLicenseException("signingCertificate is required to validate a license");
         }
@@ -70,7 +74,7 @@ public class Validator {
         return true;
     }
 
-    public boolean validateLicenseBase64(String envelopeBase64, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, Exception {
+    public boolean validateLicenseBase64(String envelopeBase64, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         // Decode the license envelope
         LicenseEnvelope envelope = LicenseEnvelope.parseBase64(envelopeBase64);
 
@@ -78,7 +82,7 @@ public class Validator {
         return validateLicense(envelope, sku, instanceID, currentTime);
     }
 
-    public boolean validateLicenseString(String envelopeJson, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, Exception {
+    public boolean validateLicenseString(String envelopeJson, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         // Decode the license envelope
         LicenseEnvelope envelope = LicenseEnvelope.parse(envelopeJson);
 
@@ -86,7 +90,7 @@ public class Validator {
         return validateLicense(envelope, sku, instanceID, currentTime);
     }
 
-    public boolean validateLicenseBytes(byte[] envelopeBytes, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, Exception {
+    public boolean validateLicenseBytes(byte[] envelopeBytes, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         // Decode the license envelope
         LicenseEnvelope envelope = LicenseEnvelope.parseBytes(envelopeBytes);
 
@@ -112,30 +116,19 @@ public class Validator {
         return validateLicenseWithOptions(options);
     }
 
-    public static boolean validateLicenseWithOptions(ValidationOptions options) throws Exception {
-        ValidatorConfig config = new ValidatorConfig();
-
-        if (!Utils.isNullOrEmpty(options.getCertPath())) {
-            config = new ValidatorConfig(config.getInstanceID(), options.getCertPath(), config.getLicensePath());
-        }
-
-        if (!Utils.isNullOrEmpty(options.getLicensePath())) {
-            config = new ValidatorConfig(config.getInstanceID(), config.getCertPath(), options.getLicensePath());
-        }
-
-        byte[] licenseBytes = Files.readAllBytes(Paths.get(config.getLicensePath()));
-
+    public static boolean validateLicenseWithOptions(ValidationOptions options) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
+        ValidatorConfig config = new ValidatorConfig(options.getInstanceID(), options.getCertPath(), options.getLicensePath());
         Validator validator = new Validator(config);
 
-        ZonedDateTime currentTime = ZonedDateTime.now();
+        ZonedDateTime currentTime = ZonedDateTime.now(ZoneOffset.UTC);
         if (options.getCurrentTime() != null) {
             currentTime = options.getCurrentTime();
         }
 
         if (!options.isSkipCertificateValidation()) {
-            String certificateDomain = options.getCertificateDomain();
-            if (certificateDomain == null || certificateDomain.isEmpty()) {
-                certificateDomain = "signingCertificateValidDnsName";
+            String certificateDomain = SIGNING_CERTIFICATE_VALID_DNS_NAME;
+            if (!Utils.isNullOrEmpty(certificateDomain)) {
+                certificateDomain = options.getCertificateDomain();
             }
 
             if (!validator.validateCertificate(certificateDomain, currentTime)) {
@@ -144,13 +137,14 @@ public class Validator {
         }
 
         String sku = options.getSku();
-        String instanceID = options.getInstanceID();
-        if (instanceID == null || instanceID.isEmpty()) {
-            instanceID = config.getInstanceID();
+        
+        byte[] licenseBytes; 
+        try {
+            licenseBytes = Files.readAllBytes(Paths.get(config.getLicensePath()));    
+        } catch (Exception e) {
+            throw new InvalidLicenseException("Failed to read license file", e);
         }
 
-        return validator.validateLicenseBytes(licenseBytes, sku, instanceID, currentTime);
+        return validator.validateLicenseBytes(licenseBytes, sku, options.getInstanceID(), currentTime);
     }
-
-    
 }

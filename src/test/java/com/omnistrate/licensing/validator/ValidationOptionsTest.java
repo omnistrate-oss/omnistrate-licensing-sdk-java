@@ -2,6 +2,7 @@ package com.omnistrate.licensing.validator;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,7 +11,7 @@ public class ValidationOptionsTest {
 
     @Test
     public void testBuilder() {
-        ZonedDateTime currentTime = ZonedDateTime.now();
+        ZonedDateTime currentTime = ZonedDateTime.now(ZoneOffset.UTC);
         ValidationOptions options = new ValidationOptions.Builder()
             .skipCertificateValidation(true)
             .certificateDomain("example.com")
@@ -28,5 +29,18 @@ public class ValidationOptionsTest {
         assertEquals("/path/to/license", options.getLicensePath());
         assertEquals("SKU123", options.getSku());
         assertEquals("instance-id", options.getInstanceID());
+    }
+
+    @Test
+    public void testBuilderDefaults() {
+        ValidationOptions options = new ValidationOptions.Builder().build();
+
+        assertFalse(options.isSkipCertificateValidation());
+        assertNull(options.getCertificateDomain());
+        assertNull(options.getCurrentTime());
+        assertNull(options.getCertPath());
+        assertNull(options.getLicensePath());
+        assertNull(options.getSku());
+        assertNull(options.getInstanceID());
     }
 }

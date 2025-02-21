@@ -44,6 +44,7 @@ import java.util.Set;
 
 import com.omnistrate.licensing.common.InvalidCertificateException;
 import com.omnistrate.licensing.common.InvalidPrivateKeyException;
+import com.omnistrate.licensing.common.InvalidSignatureException;
 
 public class CertificateUtils {
 
@@ -109,12 +110,16 @@ public class CertificateUtils {
         return signature.sign();
     }
 
-    public static boolean verifySignature(X509Certificate cert, byte[] signature, byte[] data) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException {
-        PublicKey publicKey = cert.getPublicKey();
-        Signature sig = Signature.getInstance("SHA256withRSA");
-        sig.initVerify(publicKey);
-        sig.update(data);
-        return sig.verify(signature);
+    public static boolean verifySignature(X509Certificate cert, byte[] signature, byte[] data) throws InvalidSignatureException {
+        try {
+            PublicKey publicKey = cert.getPublicKey();
+            Signature sig = Signature.getInstance("SHA256withRSA");
+            sig.initVerify(publicKey);
+            sig.update(data);
+            return sig.verify(signature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new InvalidSignatureException("Failed to verify signature", e);
+        }
     }
 
    public static boolean verifyCertificate(X509Certificate cert, String dnsName, ZonedDateTime currentTime) throws InvalidCertificateException {

@@ -78,15 +78,25 @@ public class LicenseEnvelope {
         }
     }
 
-    public static LicenseEnvelope parseBytes(byte[] data) throws Exception {
-        return mapper.readValue(data, LicenseEnvelope.class);
+    public static LicenseEnvelope parseBytes(byte[] data) throws InvalidLicenseException {
+        try {
+            return mapper.readValue(data, LicenseEnvelope.class);
+        } catch (Exception e) {
+            throw new InvalidLicenseException("Failed to parse license byte[] envelope", e);
+        }
     }
 
-    public static LicenseEnvelope parse(String data) throws Exception {
-        return parseBytes(data.getBytes("UTF-8"));
+    public static LicenseEnvelope parse(String data) throws InvalidLicenseException {
+        byte[] decoded;
+        try {
+            decoded = data.getBytes("UTF-8");
+        } catch (Exception e) {
+            throw new InvalidLicenseException("Failed to decode license string envelope", e);
+        }
+        return parseBytes(decoded);
     }
 
-    public static LicenseEnvelope parseBase64(String data) throws Exception {
+    public static LicenseEnvelope parseBase64(String data) throws InvalidLicenseException {
         byte[] decoded = Base64.getDecoder().decode(data);
         return parseBytes(decoded);
     }
