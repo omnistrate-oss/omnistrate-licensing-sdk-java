@@ -55,6 +55,7 @@ jobs:
             java-version: '11'
             distribution: 'temurin'
             architecture: x64
+            server-id: github
             gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
             gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
