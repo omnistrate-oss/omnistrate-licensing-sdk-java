@@ -19,7 +19,7 @@ You can get the package from Maven Central:
 </dependency>
 ```
 
-For more details, visit: [Maven Central](https://central.sonatype.com/artifact/om.omnistrate.licensing/omnistrate-licensing-sdk-java)
+For more details, visit: [Maven Central](https://central.sonatype.com/artifact/com.omnistrate.licensing/omnistrate-licensing-sdk-java)
 
 ## Usage Examples
 
