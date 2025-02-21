@@ -2,11 +2,10 @@ package com.omnistrate.licensing.certificate;
 
 import org.junit.jupiter.api.Test;
 
-import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -156,6 +155,32 @@ public class CertificateUtilsTest {
             // Verify signature with wrong data
             boolean isVerified = CertificateUtils.verifySignature(cert, signature, "Wrong data".getBytes());
             assertFalse(isVerified);
+        } catch (Exception e) {
+            fail("Exception should not be thrown: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testLoadPublicCertificateFromBytes() {
+        try {
+            byte[] certBytes = TEST_CERTIFICATE.getBytes();
+            X509Certificate cert = CertificateUtils.loadCertificateFromBytes(certBytes);
+            assertNotNull(cert);
+
+            assertEquals("CN=R11,O=Let's Encrypt,C=US", cert.getIssuerX500Principal().getName());
+            assertEquals("CN=licensing-test.omnistrate.dev", cert.getSubjectX500Principal().getName());
+            assertFalse(cert.getBasicConstraints() != -1);
+            assertNotNull(cert.getPublicKey());
+
+            // get a valid time that is within the certificate's validity period
+            ZonedDateTime validTime = ZonedDateTime.ofInstant(cert.getNotBefore().toInstant(), ZoneOffset.UTC).plusHours(1);
+            CertificateUtils.verifyCertificate(cert, "licensing-test.omnistrate.dev", validTime);
+            
+            // Test expired certificate
+            ZonedDateTime expiredTime =  ZonedDateTime.ofInstant(cert.getNotAfter().toInstant(), ZoneOffset.UTC).plusHours(1);
+            assertThrows(Exception.class, () -> CertificateUtils.verifyCertificate(cert, "licensing-test.omnistrate.dev", expiredTime));
+
+            assertThrows(Exception.class, () -> CertificateUtils.verifyCertificate(cert, "licensing.omnistrate.dev.invalid", validTime));
         } catch (Exception e) {
             fail("Exception should not be thrown: " + e.getMessage());
         }

@@ -95,10 +95,9 @@ public class License {
         return parseDate(creationTime);
     }
 
-    public void isValid(String sku, String instanceID) throws InvalidLicenseException {
+    public boolean isValid(String sku, String instanceID) throws InvalidLicenseException {
         if (isNullOrEmpty(id) || isNullOrEmpty(creationTime) || isNullOrEmpty(expirationTime)) {
             throw new InvalidLicenseException("Missing required fields");
-    
         }
 
         if (!isNullOrEmpty(sku)) {
@@ -123,6 +122,7 @@ public class License {
         } catch (DateTimeParseException e) {
             throw new InvalidLicenseException("Invalid expiration time");
         }
+        return true;
     }
 
     public boolean isExpired() {

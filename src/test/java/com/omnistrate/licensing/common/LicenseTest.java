@@ -57,12 +57,11 @@ public class LicenseTest {
         } catch (InvalidLicenseException e) {
             fail("Should not throw an exception");
         }
-        try {
-            invalidLicense.isValid("SKU", "instance-id");
-            fail("Should throw an exception");
-        } catch (InvalidLicenseException e) {
-            assertEquals("Missing required fields", e.getReason());
-        }
+
+        assertThrows(InvalidLicenseException.class, () -> validLicense.isValid("INVALID", "instance-id"));
+
+        assertThrows(InvalidLicenseException.class, () -> invalidLicense.isValid("SKU", "instance-id"));
+
     }
 
     @Test
@@ -123,16 +122,14 @@ public class LicenseTest {
 
         try {
             validLicense.isValid("", "");
-            fail("Should not throw an exception");
         } catch (InvalidLicenseException e) {
-            // Expected
+            fail("Should not throw an exception");
         }
 
         try {
             validLicense.isValid("SKU", "");
-            fail("Should not throw an exception");
         } catch (InvalidLicenseException e) {
-            // Expected
+            fail("Should not throw an exception");
         }
 
         try {

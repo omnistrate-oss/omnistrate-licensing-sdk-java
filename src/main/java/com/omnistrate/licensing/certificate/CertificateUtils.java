@@ -27,16 +27,19 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.security.cert.CertPathValidator;
-import java.security.cert.CertPathValidatorException;
 import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
-import java.security.cert.CertPathBuilderException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.CertificateParsingException;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.omnistrate.licensing.common.InvalidCertificateException;
@@ -114,47 +117,71 @@ public class CertificateUtils {
         return sig.verify(signature);
     }
 
-    public static void verifyCertificate(X509Certificate cert, String dnsName, ZonedDateTime currentTime) throws Exception {
-        cert.checkValidity(java.util.Date.from(currentTime.toInstant()));
-
-        Set<TrustAnchor> trustAnchors = new HashSet<>();
-        // Add CA and intermediate certificates to trustAnchors
-        X509Certificate caCert = loadCertificateFromString(Certificates.ISRGROOTX1);
-        trustAnchors.add(new TrustAnchor(caCert, null));
-        X509Certificate intermediateCert1 = loadCertificateFromString(Certificates.R10);
-        trustAnchors.add(new TrustAnchor(intermediateCert1, null));
-        X509Certificate intermediateCert2 = loadCertificateFromString(Certificates.R11);
-        trustAnchors.add(new TrustAnchor(intermediateCert2, null));
-
-        PKIXParameters params = new PKIXParameters(trustAnchors);
-        params.setRevocationEnabled(false); // Disable CRL checking to support offline verification
-
-        X509CertSelector certSelector = new X509CertSelector();
-        certSelector.setCertificate(cert);
-
-        CertPathBuilder certPathBuilder = CertPathBuilder.getInstance("PKIX");
-        PKIXBuilderParameters builderParams = new PKIXBuilderParameters(trustAnchors, certSelector);
-        builderParams.setRevocationEnabled(false); // Disable CRL checking to support offline verification
-
-        CertStore certStore = CertStore.getInstance("Collection", new CollectionCertStoreParameters(trustAnchors));
-        builderParams.addCertStore(certStore);
-
-        CertPath certPath;
+   public static void verifyCertificate(X509Certificate cert, String dnsName, ZonedDateTime currentTime) throws InvalidCertificateException {
+        // Check certificate validity date
         try {
-            certPath = certPathBuilder.build(builderParams).getCertPath();
-        } catch (CertPathBuilderException e) {
-            throw new Exception("Failed to build certification path", e);
+            cert.checkValidity(java.util.Date.from(currentTime.toInstant()));
+        } catch (CertificateExpiredException | CertificateNotYetValidException e) {
+            throw new InvalidCertificateException("Certificate is not valid at the reque time", e);
         }
 
-        // Set the current time for the validation
-        params.setDate(java.util.Date.from(currentTime.toInstant()));
-
-        CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX");
         try {
+            // Verify certificate against trust anchors
+            Set<TrustAnchor> trustAnchors = new HashSet<>();
+            // Load CA and intermediate certificates from resources
+            X509Certificate caCert = loadCertificateFromString(Certificates.ISRGROOTX1);
+            trustAnchors.add(new TrustAnchor(caCert, null));
+            X509Certificate intermediateCert1 = loadCertificateFromString(Certificates.R10);
+            trustAnchors.add(new TrustAnchor(intermediateCert1, null));
+            X509Certificate intermediateCert2 = loadCertificateFromString(Certificates.R11);
+            trustAnchors.add(new TrustAnchor(intermediateCert2, null));
+
+            PKIXParameters params = new PKIXParameters(trustAnchors);
+            params.setRevocationEnabled(false); // Disable revocation checking
+
+            X509CertSelector certSelector = new X509CertSelector();
+            certSelector.setCertificate(cert);
+
+            CertPathBuilder certPathBuilder = CertPathBuilder.getInstance("PKIX");
+            PKIXBuilderParameters builderParams = new PKIXBuilderParameters(trustAnchors, certSelector);
+            builderParams.setRevocationEnabled(false); // Disable revocation checking
+
+            CertStore certStore = CertStore.getInstance("Collection", new CollectionCertStoreParameters(trustAnchors));
+            builderParams.addCertStore(certStore);
+
+            CertPath certPath = certPathBuilder.build(builderParams).getCertPath();
+            
+            CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX");
             certPathValidator.validate(certPath, params);
-        } catch (CertPathValidatorException e) {
-            throw new Exception("Certificate path validation failed", e);
+        } catch (Exception e) {
+            throw new InvalidCertificateException("Failed to validate certificate", e);
+        }
+
+        // Validate the certificate's domain in alt names or CN
+        boolean domainValid = false;
+        try {
+            Collection<List<?>> altNames = cert.getSubjectAlternativeNames();
+            if (altNames != null) {
+                for (List<?> altName : altNames) {
+                    if (altName.get(0).equals(2) && altName.get(1).equals(dnsName)) {
+                        domainValid = true;
+                        break;
+                    }
+                }
+            }
+        } catch (CertificateParsingException e) {
+            throw new InvalidCertificateException("Failed to parse certificate subject alternative names", e);
+        }
+
+        if (!domainValid) {
+            String subjectDN = cert.getSubjectX500Principal().getName();
+            if (subjectDN.contains("CN=" + dnsName)) {
+                domainValid = true;
+            }
+        }
+
+        if (!domainValid) {
+            throw new InvalidCertificateException("Certificate is not valid for the specified domain: " + dnsName);
         }
     }
-
 }
