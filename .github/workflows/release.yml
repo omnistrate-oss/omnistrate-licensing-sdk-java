@@ -55,11 +55,11 @@ jobs:
             java-version: '11'
             distribution: 'temurin'
             architecture: x64
-            server-id: ossrh
             gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
             gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
         - name: Publish package Github
           run: mvn --batch-mode deploy -DSkipTests
           env:
-            MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
