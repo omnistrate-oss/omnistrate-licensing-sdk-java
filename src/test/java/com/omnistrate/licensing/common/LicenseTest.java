@@ -123,16 +123,14 @@ public class LicenseTest {
 
         try {
             validLicense.isValid("", "");
-            fail("Should not throw an exception");
         } catch (InvalidLicenseException e) {
-            // Expected
+            fail("Should not throw an exception");
         }
 
         try {
             validLicense.isValid("SKU", "");
-            fail("Should not throw an exception");
         } catch (InvalidLicenseException e) {
-            // Expected
+            fail("Should not throw an exception");
         }
 
         try {
