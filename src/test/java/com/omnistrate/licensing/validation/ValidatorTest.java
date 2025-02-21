@@ -1,9 +1,11 @@
-package com.omnistrate.licensing.validator;
+package com.omnistrate.licensing.validation;
 
 import com.omnistrate.licensing.certificate.CertificateUtils;
 import com.omnistrate.licensing.common.InvalidSignatureException;
 import com.omnistrate.licensing.common.License;
 import com.omnistrate.licensing.common.LicenseEnvelope;
+import com.omnistrate.licensing.validation.Validator;
+
 import org.junit.jupiter.api.Test;
 
 import java.security.PrivateKey;

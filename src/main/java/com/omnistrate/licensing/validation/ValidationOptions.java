@@ -1,4 +1,4 @@
-package com.omnistrate.licensing.validator;
+package com.omnistrate.licensing.validation;
 
 import java.time.ZonedDateTime;
 

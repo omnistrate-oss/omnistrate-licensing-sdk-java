@@ -1,6 +1,9 @@
-package com.omnistrate.licensing.validator;
+package com.omnistrate.licensing.validation;
 
 import org.junit.jupiter.api.Test;
+
+import com.omnistrate.licensing.validation.ValidatorConfig;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ValidatorConfigTest {
