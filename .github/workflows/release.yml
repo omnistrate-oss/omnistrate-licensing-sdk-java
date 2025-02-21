@@ -33,7 +33,7 @@ jobs:
           run: mvn versions:set -DnewVersion=${{ github.event.release.tag_name }}
         
         - name: Publish package
-          run: mvn -P release --batch-mode deploy -DskipTests
+          run: mvn --batch-mode deploy -DskipTests
           env:
             MAVEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
             MAVEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

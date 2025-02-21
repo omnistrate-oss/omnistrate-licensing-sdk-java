@@ -113,13 +113,6 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.22.2</version>
       </plugin>
-    </plugins>
-  </build>
-  <profiles>
-    <profile>
-    <id>release</id>
-    <build>
-      <plugins>
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
@@ -129,37 +122,6 @@
         <publishingServerId>central</publishingServerId>
         <tokenAuth>true</tokenAuth>
         <autoPublish>true</autoPublish>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>3.3.0</version>
-        <executions>
-        <execution>
-          <id>attach-sources</id>
-          <phase>verify</phase>
-          <goals>
-          <goal>jar-no-fork</goal>
-          </goals>
-        </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.6.3</version>
-        <executions>
-        <execution>
-          <id>attach-javadoc</id>
-          <goals>
-          <goal>jar</goal>
-          </goals>
-        </execution>
-        </executions>
-        <configuration>
-        <stylesheet>java</stylesheet>
-        <doclint>none</doclint>
         </configuration>
       </plugin>
       <plugin>
@@ -182,8 +144,6 @@
         </gpgArguments>
         </configuration>
       </plugin>
-      </plugins>
-    </build>
-    </profile>
-  </profiles>
+    </plugins>
+  </build>
 </project>
