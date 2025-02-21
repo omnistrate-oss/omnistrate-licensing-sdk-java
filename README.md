@@ -71,7 +71,7 @@ import com.omnistrate.licensing.validation.Validator;
 public class Main {
     public static void main(String[] args) {
         try {
-            boolean isValid = Validator.validateLicenseForProduct("[SKU]");
+            boolean isValid = Validator.validateLicenseForProduct("[SKU]"); // [SKU]  value is hardcoded, based on the value configured when enabling the feature
             if (isValid) {
                 System.out.println("License validation for product succeeded");
             } else {
