@@ -32,21 +32,33 @@ import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.omnistrate.licensing.common.InvalidCertificateException;
+
 public class CertificateUtils {
 
-    public static X509Certificate loadCertificate(String certPath) throws CertificateException, FileNotFoundException, IOException {
+    public static X509Certificate loadCertificate(String certPath) throws InvalidCertificateException {
         try (FileInputStream fis = new FileInputStream(new File(certPath))) {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             return (X509Certificate) cf.generateCertificate(fis);
+        } catch (FileNotFoundException e) {
+            throw new InvalidCertificateException("Certificate file not found: " + certPath);
+        } catch (CertificateException e) {
+            throw new InvalidCertificateException("Failed to load certificate from file: " + certPath, e);
+        } catch (IOException e) {
+            throw new InvalidCertificateException("Failed to read certificate file: " + certPath, e);
         }
     }
 
-    public static X509Certificate loadCertificateFromBytes(byte[] certBytes) throws CertificateException {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certBytes));
+    public static X509Certificate loadCertificateFromBytes(byte[] certBytes) throws InvalidCertificateException {
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certBytes));
+        } catch (CertificateException e) {
+            throw new InvalidCertificateException("Failed to load certificate from bytes", e);
+        }
     }
 
-    public static X509Certificate loadCertificateFromString(String certString) throws CertificateException {
+    public static X509Certificate loadCertificateFromString(String certString) throws InvalidCertificateException {
         return loadCertificateFromBytes(certString.getBytes());
     }
 
