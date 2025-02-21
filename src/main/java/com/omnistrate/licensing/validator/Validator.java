@@ -136,8 +136,6 @@ public class Validator {
             }
         }
 
-        String sku = options.getSku();
-        
         byte[] licenseBytes; 
         try {
             licenseBytes = Files.readAllBytes(Paths.get(config.getLicensePath()));    
@@ -145,6 +143,6 @@ public class Validator {
             throw new InvalidLicenseException("Failed to read license file", e);
         }
 
-        return validator.validateLicenseBytes(licenseBytes, sku, options.getInstanceID(), currentTime);
+        return validator.validateLicenseBytes(licenseBytes, options.getSku(), options.getInstanceID(), currentTime);
     }
 }
