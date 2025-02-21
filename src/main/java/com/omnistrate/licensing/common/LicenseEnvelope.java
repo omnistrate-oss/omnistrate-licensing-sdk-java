@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import java.util.Base64;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 
 public class LicenseEnvelope {
 
