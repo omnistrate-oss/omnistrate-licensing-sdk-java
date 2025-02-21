@@ -6,15 +6,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
@@ -47,6 +48,16 @@ public class CertificateUtils {
 
     public static X509Certificate loadCertificateFromString(String certString) throws CertificateException {
         return loadCertificateFromBytes(certString.getBytes());
+    }
+
+    public static PrivateKey loadPrivateKeyFromBytes(byte[] keyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePrivate(keySpec);
+    }
+
+    public static PrivateKey loadPrivateKeyFromString(String keyString) throws Exception {
+        return loadPrivateKeyFromBytes(keyString.getBytes());
     }
 
     public static byte[] sign(PrivateKey key, byte[] data) throws Exception {
