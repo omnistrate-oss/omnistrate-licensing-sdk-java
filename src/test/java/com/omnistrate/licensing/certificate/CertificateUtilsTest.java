@@ -136,4 +136,28 @@ public class CertificateUtilsTest {
             fail("Exception should not be thrown: " + e.getMessage());
         }
     }
+
+    @Test
+    public void testSignWithWrongSignature() {
+        try {
+            X509Certificate cert = CertificateUtils.loadCertificateFromString(TEST_CERTIFICATE);
+            assertNotNull(cert);
+
+            String data = "Test data";
+            byte[] dataBytes = data.getBytes();
+
+            // Load private key
+            PrivateKey privateKey = CertificateUtils.loadPrivateKeyFromString(TEST_PRIVATE_KEY);
+
+            // Sign data
+            byte[] signature = CertificateUtils.sign(privateKey, dataBytes);
+            assertNotNull(signature);
+
+            // Verify signature with wrong data
+            boolean isVerified = CertificateUtils.verifySignature(cert, signature, "Wrong data".getBytes());
+            assertFalse(isVerified);
+        } catch (Exception e) {
+            fail("Exception should not be thrown: " + e.getMessage());
+        }
+    }
 }

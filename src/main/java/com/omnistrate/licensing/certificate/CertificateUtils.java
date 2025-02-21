@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
@@ -35,7 +36,6 @@ import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
 import java.security.cert.CertPathBuilderException;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,6 +43,10 @@ import com.omnistrate.licensing.common.InvalidCertificateException;
 import com.omnistrate.licensing.common.InvalidPrivateKeyException;
 
 public class CertificateUtils {
+
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     public static X509Certificate loadCertificate(String certPath) throws InvalidCertificateException {
         try (FileInputStream fis = new FileInputStream(new File(certPath))) {
