@@ -41,11 +41,6 @@
       <name>Central Repository OSSRH</name>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
-    <snapshotRepository>
-      <id>github</id>
-      <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/octocat/hello-world</url>
-    </snapshotRepository>
   </distributionManagement>
 
   <dependencies>
