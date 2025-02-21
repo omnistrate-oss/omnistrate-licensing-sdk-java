@@ -26,9 +26,15 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         architecture: x64
+        gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
       
     - name: Run the Maven verify phase
       run: mvn --batch-mode --update-snapshots verify
+      env:
+        MAVEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
 
   tag:
     if: github.event_name == 'push'
