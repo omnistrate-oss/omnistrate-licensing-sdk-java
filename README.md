@@ -48,7 +48,11 @@ features:
 
 When using Helm or Operator, the secret `service-plan-subscription-license` generated with the license needs to be mounted on `/var/subscription/`
 
-### ValidateLicense
+## Usage
+
+During startup and periodically, implement one of the following options to check for the license validity:
+
+### a. ValidateLicense
 
 The validation of the license can be done on startup or periodically and does not require connection to external services to execute. 
 
@@ -73,7 +77,7 @@ public class Main {
 }
 ```
 
-### ValidateLicenseForProduct
+### b. ValidateLicenseForProduct
 
 Alternatively, if a value is set for the `productTierSku` field, this method can be used to add extra security, ensuring the license has the same shared secret. 
 
