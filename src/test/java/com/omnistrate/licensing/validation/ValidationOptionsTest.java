@@ -2,8 +2,6 @@ package com.omnistrate.licensing.validation;
 
 import org.junit.jupiter.api.Test;
 
-import com.omnistrate.licensing.validation.ValidationOptions;
-
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 

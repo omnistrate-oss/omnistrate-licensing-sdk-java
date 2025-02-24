@@ -107,11 +107,11 @@ public class Validator {
         return CertificateUtils.verifyCertificate(cert, certificateDomain, currentTime);
     }
 
-    public static boolean validateLicense() throws Exception {
+    public static boolean validateLicense() throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         return validateLicenseWithOptions(new ValidationOptions.Builder().build());
     }
 
-    public static boolean validateLicenseForProduct(String sku) throws Exception {
+    public static boolean validateLicenseForProduct(String sku) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         ValidationOptions options = new ValidationOptions.Builder().sku(sku).build();
         return validateLicenseWithOptions(options);
     }

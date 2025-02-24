@@ -4,7 +4,6 @@ import com.omnistrate.licensing.certificate.CertificateUtils;
 import com.omnistrate.licensing.common.InvalidSignatureException;
 import com.omnistrate.licensing.common.License;
 import com.omnistrate.licensing.common.LicenseEnvelope;
-import com.omnistrate.licensing.validation.Validator;
 
 import org.junit.jupiter.api.Test;
 
