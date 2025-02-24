@@ -57,7 +57,7 @@ During startup and periodically, implement one of the following options to check
 The validation of the license can be done on startup or periodically and does not require connection to external services to execute. 
 
 ```java
-package com.omnistrate.licensing.example;
+package com.example;
 
 import com.omnistrate.licensing.validator.Validator;
 
@@ -82,7 +82,7 @@ public class Main {
 Alternatively, if a value is set for the `productTierSku` field, this method can be used to add extra security, ensuring the license has the same shared secret. 
 
 ```java
-package com.omnistrate.licensing.example;
+package com.example;
 
 import com.omnistrate.licensing.validator.Validator;
 
