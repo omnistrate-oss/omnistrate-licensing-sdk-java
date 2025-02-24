@@ -59,7 +59,7 @@ The validation of the license can be done on startup or periodically and does no
 ```java
 package com.example;
 
-import com.omnistrate.licensing.validator.Validator;
+import com.omnistrate.licensing.validation.Validator;
 
 public class Main {
     public static void main(String[] args) {
@@ -84,7 +84,7 @@ Alternatively, if a value is set for the `productTierSku` field, this method can
 ```java
 package com.example;
 
-import com.omnistrate.licensing.validator.Validator;
+import com.omnistrate.licensing.validation.Validator;
 
 public class Main {
     public static void main(String[] args) {
