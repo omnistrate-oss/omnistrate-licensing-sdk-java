@@ -6,7 +6,6 @@ import com.omnistrate.licensing.common.InvalidLicenseException;
 import com.omnistrate.licensing.common.InvalidSignatureException;
 import com.omnistrate.licensing.common.License;
 import com.omnistrate.licensing.common.LicenseEnvelope;
-import com.omnistrate.licensing.common.Utils;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -16,7 +15,6 @@ import java.time.ZonedDateTime;
 
 public class Validator {
 
-    private final static String SIGNING_CERTIFICATE_VALID_DNS_NAME = "licensing.omnistrate.cloud";
 
     private X509Certificate cert;
 
@@ -126,12 +124,7 @@ public class Validator {
         }
 
         if (!options.isSkipCertificateValidation()) {
-            String certificateDomain = SIGNING_CERTIFICATE_VALID_DNS_NAME;
-            if (!Utils.isNullOrEmpty(certificateDomain)) {
-                certificateDomain = options.getCertificateDomain();
-            }
-
-            if (!validator.validateCertificate(certificateDomain, currentTime)) {
+            if (!validator.validateCertificate(options.getCertificateDomain(), currentTime)) {
                 return false;
             }
         }
