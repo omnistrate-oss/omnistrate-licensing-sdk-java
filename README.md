@@ -32,7 +32,7 @@ Docker compose example:
 x-customer-integrations:
   licensing: 
     licenseExpirationInDays: 7 # optional - defaults to 7 days
-    productTierSku: '[SKU]' # optional - identifier (shared secret) that can be used to add extra security on validation
+    productTierSku: '[product plan unique id]' # optional - identifier (shared secret) that can be used to add extra security on validation
 ```
 
 When used on a Container-based resource, Omnistrate takes care of mounting the secret and setting the environment variables for verification. 
@@ -42,7 +42,7 @@ Service spec configuration:
 features:
   licensing:
     licenseExpirationInDays: 7 # optional - defaults to 7 days
-    productTierSku: '[SKU]' # optional - identifier (shared secret) that can be used to add extra security on validation
+    productTierSku: '[product plan unique id]' # optional - identifier (shared secret) that can be used to add extra security on validation
 
 ```
 
@@ -89,7 +89,7 @@ import com.omnistrate.licensing.validation.Validator;
 public class Main {
     public static void main(String[] args) {
         try {
-            boolean isValid = Validator.validateLicenseForProduct("[SKU]"); // [SKU]  value is hardcoded, based on the value configured when enabling the feature
+            boolean isValid = Validator.validateLicenseForProduct("[product plan unique id]"); // [SKU]  value is hardcoded, based on the value configured when enabling the feature
             if (isValid) {
                 System.out.println("License validation for product succeeded");
             } else {
