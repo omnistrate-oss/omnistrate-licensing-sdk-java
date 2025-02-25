@@ -1,5 +1,6 @@
 package com.omnistrate.licensing.validation;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class ValidationOptions {
@@ -51,9 +52,12 @@ public class ValidationOptions {
     }
 
     public static class Builder {
-        private boolean skipCertificateValidation;
-        private String certificateDomain;
-        private ZonedDateTime currentTime;
+
+        private final static String SIGNING_CERTIFICATE_VALID_DNS_NAME = "licensing.omnistrate.cloud";
+
+        private boolean skipCertificateValidation = false;
+        private String certificateDomain = SIGNING_CERTIFICATE_VALID_DNS_NAME;
+        private ZonedDateTime currentTime = ZonedDateTime.now(ZoneOffset.UTC);
         private String certPath;
         private String licensePath;
         private String sku;

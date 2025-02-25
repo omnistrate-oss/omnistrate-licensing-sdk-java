@@ -36,8 +36,8 @@ public class ValidationOptionsTest {
         ValidationOptions options = new ValidationOptions.Builder().build();
 
         assertFalse(options.isSkipCertificateValidation());
-        assertNull(options.getCertificateDomain());
-        assertNull(options.getCurrentTime());
+        assertEquals(options.getCertificateDomain(), "licensing.omnistrate.cloud");
+        assertNotNull(options.getCurrentTime());
         assertNull(options.getCertPath());
         assertNull(options.getLicensePath());
         assertNull(options.getSku());
