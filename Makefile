@@ -3,4 +3,4 @@ all: build
 .PHONY: build
 build:
 	@echo "Building..."
-	@mvn verify
+	@mvn verify -Dgpg.skip=true

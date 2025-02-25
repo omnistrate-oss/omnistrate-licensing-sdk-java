@@ -28,7 +28,7 @@ jobs:
         architecture: x64
       
     - name: Run the Maven verify phase
-      run: mvn --batch-mode --update-snapshots verify -Dgpg.skip
+      run: mvn --batch-mode --update-snapshots verify -Dgpg.skip=true
 
   tag:
     if: github.event_name == 'push'
