@@ -29,7 +29,10 @@ jobs:
             gpg-passphrase: MAVEN_GPG_PASSPHRASE
         
         - name: Set version
-          run: mvn versions:set -DnewVersion=${{ github.event.release.tag_name }}
+          run: | 
+            VERSION=${{ github.event.release.tag_name }}
+            VERSION=${VERSION#v}
+            mvn versions:set -DnewVersion=$VERSION
         
         - name: Publish package Maven Central
           run: mvn --batch-mode deploy -DSkipTests
