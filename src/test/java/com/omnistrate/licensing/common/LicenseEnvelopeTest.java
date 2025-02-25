@@ -9,6 +9,18 @@ import java.util.Base64;
 public class LicenseEnvelopeTest {
 
     @Test
+    public void deserializeEnvelope() {
+        String envelopeString = "{\"license\":{\"ID\":\"08ca5ce0-a9e7-4a0c-9f16-fad135af05d3\",\"CreationTime\":\"2025-02-25T20:19:40Z\",\"ExpirationTime\":\"2025-03-04T20:19:40Z\",\"Description\":\"License for licensing-example-java (licensing-example-java)\",\"InstanceID\":\"instance-qzey2t5ik\",\"SubscriptionID\":\"sub-Q4Or8FBVd0\",\"SKU\":\"PRODUCT-SAMPLE-JAVA-SKU-UNIQUE-VALUE\",\"Version\":1},\"signature\":\"ZHVtbXk=\"}";
+        try {
+            LicenseEnvelope envelope = LicenseEnvelope.parse(envelopeString);
+            assertNotNull(envelope);
+            assertTrue(envelope.isValid());
+        } catch (Exception e) {
+            fail("Should not throw an exception");
+        }
+    }
+
+    @Test 
     public void testNewLicenseEnvelope() {
         License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();

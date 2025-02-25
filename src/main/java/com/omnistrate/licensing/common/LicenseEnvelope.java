@@ -12,13 +12,13 @@ import java.time.ZoneOffset;
 public class LicenseEnvelope {
 
     private static final ObjectMapper mapper = new ObjectMapper()
-        .setPropertyNamingStrategy(PropertyNamingStrategies.UPPER_CAMEL_CASE)
+        .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    @JsonProperty("License")
+    @JsonProperty("license")
     private License license;
 
-    @JsonProperty("Signature")
+    @JsonProperty("signature")
     private byte[] signature;
 
     public LicenseEnvelope() {
@@ -46,9 +46,6 @@ public class LicenseEnvelope {
     }
 
     public boolean isExpiredAt(ZonedDateTime currentTime) {
-        if (!isValid()) {
-            return true;
-        }
         return license.isExpiredAt(currentTime);
     }
 
@@ -58,7 +55,7 @@ public class LicenseEnvelope {
 
     @Override
     public String toString() {
-        return String.format("{\"License\":%s,\"Signature\":\"%s\"}", license.toString(), Base64.getEncoder().encodeToString(signature));
+        return String.format("{\"license\":%s,\"signature\":\"%s\"}", license.toString(), Base64.getEncoder().encodeToString(signature));
     }
 
     @Override
