@@ -34,7 +34,7 @@ public class Validator {
         this(config.getCertPath());
     }
     
-    public boolean validateLicense(LicenseEnvelope envelope, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
+    public boolean validateLicense(LicenseEnvelope envelope, String organizationID, String productPlanUniqueID, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         if (cert == null) {
             throw new InvalidLicenseException("signingCertificate is required to validate a license");
         }
@@ -55,7 +55,7 @@ public class Validator {
         byte[] licenseBytes = license.toBytes();
 
         // Check if the license is valid
-        if (!license.isValid(sku, instanceID)) {
+        if (!license.isValid(organizationID, productPlanUniqueID, instanceID)) {
             throw new InvalidLicenseException("license is invalid");
         }
 
@@ -72,28 +72,28 @@ public class Validator {
         return true;
     }
 
-    public boolean validateLicenseBase64(String envelopeBase64, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
+    public boolean validateLicenseBase64(String envelopeBase64,  String organizationID, String productPlanUniqueID, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         // Decode the license envelope
         LicenseEnvelope envelope = LicenseEnvelope.parseBase64(envelopeBase64);
 
         // Validate the license
-        return validateLicense(envelope, sku, instanceID, currentTime);
+        return validateLicense(envelope, organizationID, productPlanUniqueID, instanceID, currentTime);
     }
 
-    public boolean validateLicenseString(String envelopeJson, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
+    public boolean validateLicenseString(String envelopeJson,  String organizationID, String productPlanUniqueID, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         // Decode the license envelope
         LicenseEnvelope envelope = LicenseEnvelope.parse(envelopeJson);
 
         // Validate the license
-        return validateLicense(envelope, sku, instanceID, currentTime);
+        return validateLicense(envelope, organizationID, productPlanUniqueID, instanceID, currentTime);
     }
 
-    public boolean validateLicenseBytes(byte[] envelopeBytes, String sku, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
+    public boolean validateLicenseBytes(byte[] envelopeBytes, String organizationID, String productPlanUniqueID, String instanceID, ZonedDateTime currentTime) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         // Decode the license envelope
         LicenseEnvelope envelope = LicenseEnvelope.parseBytes(envelopeBytes);
 
         // Validate the license
-        return validateLicense(envelope, sku, instanceID, currentTime);
+        return validateLicense(envelope, organizationID, productPlanUniqueID, instanceID, currentTime);
     }
 
     public boolean validateCertificate(String certificateDomain, ZonedDateTime currentTime) throws InvalidCertificateException {
@@ -105,14 +105,13 @@ public class Validator {
         return CertificateUtils.verifyCertificate(cert, certificateDomain, currentTime);
     }
 
-    public static boolean validateLicense() throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
-        return validateLicenseWithOptions(new ValidationOptions.Builder().build());
-    }
-
-    public static boolean validateLicenseForProduct(String sku) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
-        ValidationOptions options = new ValidationOptions.Builder().sku(sku).build();
-        return validateLicenseWithOptions(options);
-    }
+    public static boolean validateLicense(String organizationID, String productPlanUniqueID) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
+        return validateLicenseWithOptions(
+            new ValidationOptions.Builder()
+                .organizationID(organizationID)
+                .productPlanUniqueID(productPlanUniqueID)
+                .build());
+    }   
 
     public static boolean validateLicenseWithOptions(ValidationOptions options) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {
         ValidatorConfig config = new ValidatorConfig(options.getInstanceID(), options.getCertPath(), options.getLicensePath());
@@ -136,6 +135,6 @@ public class Validator {
             throw new InvalidLicenseException("Failed to read license file", e);
         }
 
-        return validator.validateLicenseBytes(licenseBytes, options.getSku(), options.getInstanceID(), currentTime);
+        return validator.validateLicenseBytes(licenseBytes, options.getOrganizationID(), options.getProductPlanUniqueID(), options.getInstanceID(), currentTime);
     }
 }

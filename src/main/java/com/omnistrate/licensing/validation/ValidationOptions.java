@@ -10,7 +10,8 @@ public class ValidationOptions {
     private ZonedDateTime currentTime;
     private String certPath;
     private String licensePath;
-    private String sku;
+    private String productPlanUniqueID;
+    private String organizationID;
     private String instanceID;
 
     private ValidationOptions(Builder builder) {
@@ -19,7 +20,8 @@ public class ValidationOptions {
         this.currentTime = builder.currentTime;
         this.certPath = builder.certPath;
         this.licensePath = builder.licensePath;
-        this.sku = builder.sku;
+        this.productPlanUniqueID = builder.productPlanUniqueID;
+        this.organizationID = builder.organizationID;
         this.instanceID = builder.instanceID;
     }
 
@@ -43,8 +45,12 @@ public class ValidationOptions {
         return licensePath;
     }
 
-    public String getSku() {
-        return sku;
+    public String getProductPlanUniqueID() {
+        return productPlanUniqueID;
+    }
+
+    public String getOrganizationID() {
+        return organizationID;
     }
 
     public String getInstanceID() {
@@ -60,7 +66,8 @@ public class ValidationOptions {
         private ZonedDateTime currentTime = ZonedDateTime.now(ZoneOffset.UTC);
         private String certPath;
         private String licensePath;
-        private String sku;
+        private String productPlanUniqueID;
+        private String organizationID;
         private String instanceID;
 
         public Builder skipCertificateValidation(boolean skipCertificateValidation) {
@@ -88,8 +95,13 @@ public class ValidationOptions {
             return this;
         }
 
-        public Builder sku(String sku) {
-            this.sku = sku;
+        public Builder productPlanUniqueID(String productPlanUniqueID) {
+            this.productPlanUniqueID = productPlanUniqueID;
+            return this;
+        }
+
+        public Builder organizationID(String organizationID) {
+            this.organizationID = organizationID;
             return this;
         }
 

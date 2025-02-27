@@ -10,7 +10,7 @@ public class LicenseEnvelopeTest {
 
     @Test
     public void deserializeEnvelope() {
-        String envelopeString = "{\"license\":{\"ID\":\"08ca5ce0-a9e7-4a0c-9f16-fad135af05d3\",\"CreationTime\":\"2025-02-25T20:19:40Z\",\"ExpirationTime\":\"2025-03-04T20:19:40Z\",\"Description\":\"License for licensing-example-java (licensing-example-java)\",\"InstanceID\":\"instance-qzey2t5ik\",\"SubscriptionID\":\"sub-Q4Or8FBVd0\",\"SKU\":\"PRODUCT-SAMPLE-JAVA-SKU-UNIQUE-VALUE\",\"Version\":1},\"signature\":\"ZHVtbXk=\"}";
+        String envelopeString = "{\"License\":{\"ID\":\"08ca5ce0-a9e7-4a0c-9f16-fad135af05d3\",\"CreationTime\":\"2025-02-25T20:19:40Z\",\"ExpirationTime\":\"2025-03-04T20:19:40Z\",\"Description\":\"License for licensing-example-java (licensing-example-java)\",\"InstanceID\":\"instance-qzey2t5ik\",\"SubscriptionID\":\"sub-Q4Or8FBVd0\",\"productPlanUniqueID\":\"PRODUCT-SAMPLE-JAVA-SKU-UNIQUE-VALUE\",\"organizationID\":\"orgID\",\"Version\":1},\"Signature\":\"ZHVtbXk=\"}";
         try {
             LicenseEnvelope envelope = LicenseEnvelope.parse(envelopeString);
             assertNotNull(envelope);
@@ -22,7 +22,7 @@ public class LicenseEnvelopeTest {
 
     @Test 
     public void testNewLicenseEnvelope() {
-        License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
+        License license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
@@ -33,7 +33,7 @@ public class LicenseEnvelopeTest {
 
     @Test
     public void testIsValid() {
-        License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
+        License license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
@@ -48,20 +48,20 @@ public class LicenseEnvelopeTest {
 
     @Test
     public void testIsExpired() {
-        License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
+        License license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
         assertFalse(le.isExpired());
 
-        license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().minusDays(1));
+        license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().minusDays(1));
         le = new LicenseEnvelope(license, signature);
         assertTrue(le.isExpired());
     }
 
     @Test
     public void testToBytes() throws Exception {
-        License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
+        License license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
@@ -71,7 +71,7 @@ public class LicenseEnvelopeTest {
 
     @Test
     public void testToString() {
-        License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
+        License license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
@@ -81,7 +81,7 @@ public class LicenseEnvelopeTest {
 
     @Test
     public void testToBase64() {
-        License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
+        License license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
@@ -94,7 +94,7 @@ public class LicenseEnvelopeTest {
 
     @Test
     public void testParseBytes() throws Exception {
-        License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
+        License license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
@@ -107,7 +107,7 @@ public class LicenseEnvelopeTest {
 
     @Test
     public void testParseString() throws Exception {
-        License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
+        License license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 
@@ -120,7 +120,7 @@ public class LicenseEnvelopeTest {
 
     @Test
     public void testParseBase64() throws Exception {
-        License license = new License("sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
+        License license = new License("orgID","sku", "instanceID", "subscriptionID", "description", ZonedDateTime.now(), ZonedDateTime.now().plusDays(30));
         byte[] signature = "test-signature".getBytes();
         LicenseEnvelope le = new LicenseEnvelope(license, signature);
 

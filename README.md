@@ -31,8 +31,10 @@ Docker compose example:
 ```yaml
 x-customer-integrations:
   licensing: 
-    licenseExpirationInDays: 7 # optional - defaults to 7 days
-    productTierSku: '[product plan unique id]' # optional - identifier (shared secret) that can be used to add extra security on validation
+    # optional - defaults to 7 days
+    licenseExpirationInDays: 7
+    # optional - identifier (shared secret) that can be used to add extra security on validation - defaults to product tier id
+    productPlanUniqueIdentifier: '[product plan unique id]' 
 ```
 
 When used on a Container-based resource, Omnistrate takes care of mounting the secret and setting the environment variables for verification. 
@@ -41,20 +43,26 @@ Service spec configuration:
 ```yaml
 features:
   licensing:
-    licenseExpirationInDays: 7 # optional - defaults to 7 days
-    productTierSku: '[product plan unique id]' # optional - identifier (shared secret) that can be used to add extra security on validation
-
+    # optional - defaults to 7 days
+    licenseExpirationInDays: 7 
+    # optional - identifier (shared secret) that can be used to add extra security on validation - defaults to product tier id
+    productPlanUniqueIdentifier: '[product plan unique id]'
 ```
 
 When using Helm or Operator, the secret `service-plan-subscription-license` generated with the license needs to be mounted on `/var/subscription/`
 
+### Get your Organization ID
+
+The Organization ID will be needed to ensure the license maps to products plans defined for your organization. We will that globally unique id in the validation process. 
+
+You can get you Organization ID from your user profile. 
+![Profile](./assets/profile.png)
+
 ## Usage
 
-During startup and periodically, implement one of the following options to check for the license validity:
+During startup and periodically, implement the following check:
 
-### a. ValidateLicense
-
-The validation of the license can be done on startup or periodically and does not require connection to external services to execute. 
+### Validate License
 
 ```java
 package com.example;
@@ -64,32 +72,7 @@ import com.omnistrate.licensing.validation.Validator;
 public class Main {
     public static void main(String[] args) {
         try {
-            boolean isValid = Validator.validateLicense();
-            if (isValid) {
-                System.out.println("License validation succeeded");
-            } else {
-                System.out.println("License validation failed");
-            }
-        } catch (Exception e) {
-            System.out.println("License validation failed: " + e.getMessage());
-        }
-    }
-}
-```
-
-### b. ValidateLicenseForProduct
-
-Alternatively, if a value is set for the `productTierSku` field, this method can be used to add extra security, ensuring the license has the same shared secret. 
-
-```java
-package com.example;
-
-import com.omnistrate.licensing.validation.Validator;
-
-public class Main {
-    public static void main(String[] args) {
-        try {
-            boolean isValid = Validator.validateLicenseForProduct("[product plan unique id]"); // [SKU]  value is hardcoded, based on the value configured when enabling the feature
+            boolean isValid = Validator.validateLicenseForProduct("[org-id]", "[product plan unique id]"); /// value should be hardcoded, based on the value configured when enabling the feature
             if (isValid) {
                 System.out.println("License validation for product succeeded");
             } else {
