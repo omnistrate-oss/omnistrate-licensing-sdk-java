@@ -1,6 +1,7 @@
 package com.omnistrate.licensing.validation;
 
 import com.omnistrate.licensing.certificate.CertificateUtils;
+import com.omnistrate.licensing.common.InvalidLicenseException;
 import com.omnistrate.licensing.common.InvalidSignatureException;
 import com.omnistrate.licensing.common.License;
 import com.omnistrate.licensing.common.LicenseEnvelope;
@@ -90,14 +91,21 @@ public class ValidatorTest {
             X509Certificate cert = CertificateUtils.loadCertificateFromString(TEST_CERTIFICATE);
             PrivateKey privateKey = CertificateUtils.loadPrivateKeyFromString(TEST_PRIVATE_KEY);
 
-            License license = new License("SKU", "instance-1", "subs-1", "product a", now, now.plusDays(2));
+            License license = new License("orgID", "SKU", "instance-1", "subs-1", "product a", now, now.plusDays(2));
             byte[] licenseBytes = license.toBytes();
             byte[] signature = CertificateUtils.sign(privateKey, licenseBytes);
 
             LicenseEnvelope envelope = new LicenseEnvelope(license, signature);
 
             Validator validator = new Validator(cert);
-            assertTrue(validator.validateLicense(envelope, "SKU", "instance-1", now));
+            assertTrue(validator.validateLicense(envelope, "orgID", "SKU", "instance-1", now));
+            assertTrue(validator.validateLicense(envelope, "orgID", "SKU", "", now));
+            assertTrue(validator.validateLicense(envelope, "", "SKU", "", now));
+            assertTrue(validator.validateLicense(envelope, "", "", "", now));
+
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicense(envelope, "INVALID", "SKU", "instance-1", now));
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicense(envelope, "orgID", "INVALID", "instance-1", now));
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicense(envelope, "orgID", "SKU", "INVALID", now));
         } catch (Exception e) {
             fail("Exception should not be thrown: " + e.getMessage());
         }
@@ -110,7 +118,7 @@ public class ValidatorTest {
             X509Certificate cert = CertificateUtils.loadCertificateFromString(TEST_CERTIFICATE);
             PrivateKey privateKey = CertificateUtils.loadPrivateKeyFromString(TEST_PRIVATE_KEY);
 
-            License license = new License("SKU", "instance-1", "subs-1", "product a", now, now.plusDays(2));
+            License license = new License("orgID", "SKU", "instance-1", "subs-1", "product a", now, now.plusDays(2));
             byte[] licenseBytes = license.toBytes();
             byte[] signature = CertificateUtils.sign(privateKey, licenseBytes);
 
@@ -118,7 +126,14 @@ public class ValidatorTest {
             String envelopeBase64 = envelope.toBase64();
 
             Validator validator = new Validator(cert);
-            assertTrue(validator.validateLicenseBase64(envelopeBase64, "SKU", "instance-1", now));
+            assertTrue(validator.validateLicenseBase64(envelopeBase64, "orgID", "SKU", "instance-1", now));
+            assertTrue(validator.validateLicenseBase64(envelopeBase64, "orgID", "SKU", "", now));
+            assertTrue(validator.validateLicenseBase64(envelopeBase64, "", "SKU", "", now));
+            assertTrue(validator.validateLicenseBase64(envelopeBase64, "", "", "", now));
+
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicenseBase64(envelopeBase64,  "INVALID", "SKU", "instance-1", now));
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicenseBase64(envelopeBase64, "orgID", "INVALID", "instance-1", now));
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicenseBase64(envelopeBase64, "orgID", "SKU", "INVALID", now));
         } catch (Exception e) {
             fail("Exception should not be thrown: " + e.getMessage());
         }
@@ -130,13 +145,13 @@ public class ValidatorTest {
             ZonedDateTime now = ZonedDateTime.now();
             X509Certificate cert = CertificateUtils.loadCertificateFromString(TEST_CERTIFICATE);
 
-            License license = new License("SKU", "instance-1", "subs-1", "product a", now, now.plusDays(2));
+            License license = new License("orgID", "SKU", "instance-1", "subs-1", "product a", now, now.plusDays(2));
             byte[] invalidSignature = "invalid-signature".getBytes();
 
             LicenseEnvelope envelope = new LicenseEnvelope(license, invalidSignature);
 
             Validator validator = new Validator(cert);
-            assertThrows(InvalidSignatureException.class, () -> validator.validateLicense(envelope, "SKU", "instance-1", now));
+            assertThrows(InvalidSignatureException.class, () -> validator.validateLicense(envelope, "orgID", "SKU", "instance-1", now));
         } catch (Exception e) {
             fail("Exception should not be thrown: " + e.getMessage());
         }

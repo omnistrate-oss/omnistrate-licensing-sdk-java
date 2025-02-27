@@ -35,23 +35,27 @@ public class License {
     @JsonProperty("SubscriptionID")
     private String subscriptionID;
 
-    @JsonProperty("SKU")
-    private String sku;
+    @JsonProperty("ProductPlanUniqueID")
+    private String productPlanUniqueID;
     
     @JsonProperty("Version")
     private long version;
 
+    @JsonProperty("OrganizationID")
+    private String organizationID;
+
     public License() {
     }
 
-    public License(String sku, String instanceID, String subscriptionID, String description, ZonedDateTime creationTime, ZonedDateTime expirationTime) {
+    public License(String organizationID, String productPlanUniqueID, String instanceID, String subscriptionID, String description, ZonedDateTime creationTime, ZonedDateTime expirationTime) {
         this.id = UUID.randomUUID().toString();
         this.creationTime = formatDate(creationTime);
         this.expirationTime = formatDate(expirationTime);
         this.instanceID = instanceID;
         this.subscriptionID = subscriptionID;
         this.description = description;
-        this.sku = sku;
+        this.productPlanUniqueID = productPlanUniqueID;
+        this.organizationID = organizationID;
         this.version = 1;
     }
 
@@ -59,8 +63,12 @@ public class License {
         return id;
     }
 
-    public String getSku() {
-        return sku;
+    public String getProductPlanUniqueID() {
+        return productPlanUniqueID;
+    }
+
+    public String getOrganizationID() {
+        return organizationID;
     }
 
     public String getDescription() {
@@ -95,14 +103,20 @@ public class License {
         return parseDate(creationTime);
     }
 
-    public boolean isValid(String sku, String instanceID) throws InvalidLicenseException {
+    public boolean isValid(String organizationID, String productPlanUniqueID, String instanceID) throws InvalidLicenseException {
         if (Utils.isNullOrEmpty(id) || Utils.isNullOrEmpty(creationTime) || Utils.isNullOrEmpty(expirationTime)) {
             throw new InvalidLicenseException("Missing required fields");
         }
 
-        if (!Utils.isNullOrEmpty(sku)) {
-            if (!sku.equals("" + this.sku)) {
-                throw new InvalidLicenseException("Invalid SKU expected " + this.sku + " got " + sku);
+        if (!Utils.isNullOrEmpty(organizationID)) {
+            if (!organizationID.equals(this.organizationID)) {
+                throw new InvalidLicenseException("Invalid organization ID expected " + this.organizationID + " got " + organizationID);
+            }
+        }
+
+        if (!Utils.isNullOrEmpty(productPlanUniqueID)) {
+            if (!productPlanUniqueID.equals("" + this.productPlanUniqueID)) {
+                throw new InvalidLicenseException("Invalid product plan unique id expected " + this.productPlanUniqueID + " got " + productPlanUniqueID);
             }
         }
 
@@ -153,8 +167,8 @@ public class License {
 
     @Override
     public String toString() {
-        return String.format("{\"ID\":\"%s\",\"CreationTime\":\"%s\",\"ExpirationTime\":\"%s\",\"Description\":\"%s\",\"InstanceID\":\"%s\",\"SubscriptionID\":\"%s\",\"SKU\":\"%s\",\"Version\":%d}",
-                id, creationTime, expirationTime, description, instanceID, subscriptionID, sku, version);
+        return String.format("{\"ID\":\"%s\",\"CreationTime\":\"%s\",\"ExpirationTime\":\"%s\",\"Description\":\"%s\",\"InstanceID\":\"%s\",\"SubscriptionID\":\"%s\",\"ProductPlanUniqueID\":\"%s\",\"OrganizationID\":\"%s\",\"Version\":%d}",
+                id, creationTime, expirationTime, description, instanceID, subscriptionID, productPlanUniqueID, organizationID, version);
     }
 
     @Override
@@ -163,7 +177,7 @@ public class License {
             return false;
         }
         License other = (License) obj;
-        return id.equals(other.id) && creationTime.equals(other.creationTime) && expirationTime.equals(other.expirationTime) && description.equals(other.description) && instanceID.equals(other.instanceID) && subscriptionID.equals(other.subscriptionID) && sku.equals(other.sku) && version == other.version;
+        return id.equals(other.id) && creationTime.equals(other.creationTime) && expirationTime.equals(other.expirationTime) && description.equals(other.description) && instanceID.equals(other.instanceID) && subscriptionID.equals(other.subscriptionID) && productPlanUniqueID.equals(other.productPlanUniqueID) && organizationID.equals(other.organizationID) && version == other.version;
     }
 
     public static License parse(String s) throws Exception {

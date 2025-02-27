@@ -18,7 +18,8 @@ public class ValidationOptionsTest {
             .currentTime(currentTime)
             .certPath("/path/to/cert")
             .licensePath("/path/to/license")
-            .sku("SKU123")
+            .productPlanUniqueID("product-plan-id")
+            .organizationID("org-id")
             .instanceID("instance-id")
             .build();
 
@@ -27,8 +28,9 @@ public class ValidationOptionsTest {
         assertEquals(currentTime, options.getCurrentTime());
         assertEquals("/path/to/cert", options.getCertPath());
         assertEquals("/path/to/license", options.getLicensePath());
-        assertEquals("SKU123", options.getSku());
         assertEquals("instance-id", options.getInstanceID());
+        assertEquals("product-plan-id", options.getProductPlanUniqueID());
+        assertEquals("org-id", options.getOrganizationID());
     }
 
     @Test
@@ -40,7 +42,8 @@ public class ValidationOptionsTest {
         assertNotNull(options.getCurrentTime());
         assertNull(options.getCertPath());
         assertNull(options.getLicensePath());
-        assertNull(options.getSku());
+        assertNull(options.getProductPlanUniqueID());
+        assertNull(options.getOrganizationID());
         assertNull(options.getInstanceID());
     }
 }

@@ -12,10 +12,11 @@ public class LicenseTest {
     public void testNewLicense() {
         ZonedDateTime creationTime = ZonedDateTime.now();
         ZonedDateTime expirationTime = creationTime.plusDays(1);
-        License license = new License("SKU", "instance-id", "sub-id", "desc", creationTime, expirationTime);
+        License license = new License("orgID", "SKU", "instance-id", "sub-id", "desc", creationTime, expirationTime);
 
         assertNotNull(license.getId());
-        assertEquals("SKU", license.getSku());
+        assertEquals("orgID", license.getOrganizationID());
+        assertEquals("SKU", license.getProductPlanUniqueID());
         assertEquals("desc", license.getDescription());
         assertEquals("sub-id", license.getSubscriptionID());
         assertEquals("instance-id", license.getInstanceID());
@@ -26,14 +27,14 @@ public class LicenseTest {
 
     @Test
     public void testGetExpirationTime() {
-        License license = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        License license = new License("orgID", "SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
         ZonedDateTime expirationTime = license.getExpirationTime();
         assertNotNull(expirationTime);
     }
 
     @Test
     public void testRenew() {
-        License license = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        License license = new License("orgID", "SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
         ZonedDateTime newExpirationTime = ZonedDateTime.now().plusYears(1);
         license.renew(newExpirationTime);
 
@@ -42,32 +43,36 @@ public class LicenseTest {
 
     @Test
     public void testGetCreationTime() {
-        License license = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        License license = new License("orgID", "SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
         ZonedDateTime creationTime = license.getCreationTime();
         assertNotNull(creationTime);
     }
 
     @Test
     public void testIsValid() {
-        License validLicense = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
-        License invalidLicense = new License(null, "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        License validLicense = new License("orgID", "SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        License invalidLicense = new License(null, null, "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
 
         try {
-            validLicense.isValid("SKU", "instance-id");
+            assertTrue(validLicense.isValid("orgID", "SKU", "instance-id"));
+            assertTrue(validLicense.isValid("", "SKU", "instance-id"));
+            assertTrue(validLicense.isValid("orgID", "", "instance-id"));
+            assertTrue(validLicense.isValid("orgID", "SKU", ""));
+            assertTrue(validLicense.isValid("", "", ""));
         } catch (InvalidLicenseException e) {
             fail("Should not throw an exception");
         }
 
-        assertThrows(InvalidLicenseException.class, () -> validLicense.isValid("INVALID", "instance-id"));
-
-        assertThrows(InvalidLicenseException.class, () -> invalidLicense.isValid("SKU", "instance-id"));
+        assertThrows(InvalidLicenseException.class, () -> validLicense.isValid("INVALID", "SKU", "instance-id"));
+        assertThrows(InvalidLicenseException.class, () -> validLicense.isValid("orgID", "INVALID", "instance-id"));
+        assertThrows(InvalidLicenseException.class, () -> invalidLicense.isValid("orgID", "SKU", "instance-id"));
 
     }
 
     @Test
     public void testIsExpired() {
-        License expiredLicense = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now().minusDays(2), ZonedDateTime.now().minusDays(1));
-        License validLicense = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        License expiredLicense = new License("orgID","SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now().minusDays(2), ZonedDateTime.now().minusDays(1));
+        License validLicense = new License("orgID","SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
 
         assertTrue(expiredLicense.isExpired());
         assertFalse(validLicense.isExpired());
@@ -75,21 +80,21 @@ public class LicenseTest {
 
     @Test
     public void testToBytes() {
-        License license = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        License license = new License("orgID","SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
         byte[] bytes = license.toBytes();
         assertNotNull(bytes);
     }
 
     @Test
     public void testToString() {
-        License license = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        License license = new License("orgID","SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
         String jsonString = license.toString();
         assertNotNull(jsonString);
     }
 
     @Test
     public void testParse() throws Exception {
-        String jsonString = "{\"ID\":\"1234\",\"CreationTime\":\"2021-01-01T00:00:00Z\",\"ExpirationTime\":\"2022-02-01T00:00:00Z\",\"Description\":\"desc\",\"InstanceID\":\"instance-id\",\"SubscriptionID\":\"sub-id\",\"SKU\":\"SKU\",\"Version\":1}";
+        String jsonString = "{\"ID\":\"1234\",\"CreationTime\":\"2021-01-01T00:00:00Z\",\"ExpirationTime\":\"2022-02-01T00:00:00Z\",\"Description\":\"desc\",\"InstanceID\":\"instance-id\",\"SubscriptionID\":\"sub-id\",\"ProductPlanUniqueID\":\"SKU\",\"OrganizationID\":\"orgID\",\"Version\":1}";
         License license = License.parse(jsonString);
 
         assertEquals("1234", license.getId());
@@ -98,13 +103,14 @@ public class LicenseTest {
         assertEquals("desc", license.getDescription());
         assertEquals("instance-id", license.getInstanceID());
         assertEquals("sub-id", license.getSubscriptionID());
-        assertEquals("SKU", license.getSku());
+        assertEquals("SKU", license.getProductPlanUniqueID());
+        assertEquals("orgID", license.getOrganizationID());
         assertEquals(1, license.getVersion());
     }
 
     @Test   
     public void testSerialize() {
-        License license = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        License license = new License("orgID", "SKU", "instance-id", "sub-id", "desc", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
         String jsonString = license.toString();
         assertNotNull(jsonString);
         try {
@@ -117,30 +123,30 @@ public class LicenseTest {
 
     @Test
     public void testIsValidWithSKU() {
-        License validLicense = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.parse("2021-01-01T00:00:00Z"), ZonedDateTime.parse("2022-01-01T00:00:00Z"));
-        License invalidLicense = new License("", "instance-id", "sub-id", "desc", ZonedDateTime.parse("2021-01-01T00:00:00Z"), ZonedDateTime.parse("2022-01-01T00:00:00Z"));
+        License validLicense = new License("orgID","SKU", "instance-id", "sub-id", "desc", ZonedDateTime.parse("2021-01-01T00:00:00Z"), ZonedDateTime.parse("2022-01-01T00:00:00Z"));
+        License invalidLicense = new License("", "", "instance-id", "sub-id", "desc", ZonedDateTime.parse("2021-01-01T00:00:00Z"), ZonedDateTime.parse("2022-01-01T00:00:00Z"));
 
         try {
-            validLicense.isValid("", "");
+            validLicense.isValid("", "", "");
         } catch (InvalidLicenseException e) {
             fail("Should not throw an exception");
         }
 
         try {
-            validLicense.isValid("SKU", "");
+            validLicense.isValid("orgID","SKU", "");
         } catch (InvalidLicenseException e) {
             fail("Should not throw an exception");
         }
 
         try {
-            validLicense.isValid("INVALID", "");
+            validLicense.isValid("orgID","INVALID", "");
             fail("Should throw an exception");
         } catch (InvalidLicenseException e) {
             // Expected
         }
 
         try {
-            invalidLicense.isValid("SKU", "");
+            invalidLicense.isValid("orgID","SKU", "");
             fail("Should throw an exception");
         } catch (InvalidLicenseException e) {
             // Expected
@@ -149,30 +155,30 @@ public class LicenseTest {
 
     @Test
     public void testIsValidWithInstanceID() {
-        License validLicense = new License("SKU", "instance-id", "sub-id", "desc", ZonedDateTime.parse("2021-01-01T00:00:00Z"), ZonedDateTime.parse("2022-01-01T00:00:00Z"));
-        License invalidLicense = new License("", "instance-id", "sub-id", "desc", ZonedDateTime.parse("2021-01-01T00:00:00Z"), ZonedDateTime.parse("2022-01-01T00:00:00Z"));
+        License validLicense = new License("orgID", "SKU", "instance-id", "sub-id", "desc", ZonedDateTime.parse("2021-01-01T00:00:00Z"), ZonedDateTime.parse("2022-01-01T00:00:00Z"));
+        License invalidLicense = new License("","", "instance-id", "sub-id", "desc", ZonedDateTime.parse("2021-01-01T00:00:00Z"), ZonedDateTime.parse("2022-01-01T00:00:00Z"));
 
         try {
-            validLicense.isValid("", "");
+            validLicense.isValid("", "", "");
         } catch (InvalidLicenseException e) {
             fail("Should not throw an exception");
         }
 
         try {
-            validLicense.isValid("SKU", "instance-id");
+            validLicense.isValid("orgID", "SKU", "instance-id");
         } catch (InvalidLicenseException e) {
             fail("Should not throw an exception");
         }
 
         try {
-            invalidLicense.isValid("SKU", "INVALID");
+            invalidLicense.isValid("orgID", "SKU", "INVALID");
             fail("Should throw an exception");
         } catch (InvalidLicenseException e) {
             // Expected
         }
 
         try {
-            invalidLicense.isValid("SKU", "instance-id");
+            invalidLicense.isValid("orgID", "SKU", "instance-id");
             fail("Should throw an exception");
         } catch (InvalidLicenseException e) {
             // Expected
