@@ -34,7 +34,7 @@ x-customer-integrations:
   licensing: 
     # optional - defaults to 7 days
     licenseExpirationInDays: 7
-    # optional - identifier (shared secret) that can be used to add extra security on validation - defaults to product tier id
+    # optional - identifier used to add extra security on validation - defaults to product tier id
     productPlanUniqueIdentifier: '[product plan unique id]' 
 ```
 
@@ -48,7 +48,7 @@ features:
     licensing:
       # optional - defaults to 7 days
       licenseExpirationInDays: 7 
-      # optional - identifier (shared secret) that can be used to add extra security on validation - defaults to product tier id
+      # optional - identifier used to add extra security on validation - defaults to product tier id
       productPlanUniqueIdentifier: '[product plan unique id]'
 ```
 
