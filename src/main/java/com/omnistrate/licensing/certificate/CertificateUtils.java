@@ -143,6 +143,7 @@ public class CertificateUtils {
 
             PKIXParameters params = new PKIXParameters(trustAnchors);
             params.setRevocationEnabled(false); // Disable revocation checking
+            params.setDate(java.util.Date.from(currentTime.toInstant())); // Set the date for validation
 
             X509CertSelector certSelector = new X509CertSelector();
             certSelector.setCertificate(cert);
@@ -150,16 +151,15 @@ public class CertificateUtils {
             CertPathBuilder certPathBuilder = CertPathBuilder.getInstance("PKIX");
             PKIXBuilderParameters builderParams = new PKIXBuilderParameters(trustAnchors, certSelector);
             builderParams.setRevocationEnabled(false); // Disable revocation checking
+            builderParams.setDate(java.util.Date.from(currentTime.toInstant())); // Set the date for validation
 
             CertStore certStore = CertStore.getInstance("Collection", new CollectionCertStoreParameters(trustAnchors));
             builderParams.addCertStore(certStore);
 
-            builderParams.setDate(java.util.Date.from(currentTime.toInstant()));
 
             CertPath certPath = certPathBuilder.build(builderParams).getCertPath();
             
             CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX");
-            params.setDate(java.util.Date.from(currentTime.toInstant()));
             certPathValidator.validate(certPath, params);
         } catch (Exception e) {
             throw new InvalidCertificateException("Failed to validate certificate", e);
