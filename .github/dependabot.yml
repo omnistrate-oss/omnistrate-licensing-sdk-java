@@ -28,3 +28,4 @@ updates:
           - "org.apache.*"
           - "com.fasterxml.jackson.*"
           - "org.springframework.*"
+          - "org.junit.*"
