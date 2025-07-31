@@ -127,7 +127,7 @@ public class CertificateUtils {
         try {
             cert.checkValidity(java.util.Date.from(currentTime.toInstant()));
         } catch (CertificateExpiredException | CertificateNotYetValidException e) {
-            throw new InvalidCertificateException("Certificate is not valid at the reque time", e);
+            throw new InvalidCertificateException("Certificate is not valid at " + currentTime, e);
         }
 
         try {
@@ -143,6 +143,7 @@ public class CertificateUtils {
 
             PKIXParameters params = new PKIXParameters(trustAnchors);
             params.setRevocationEnabled(false); // Disable revocation checking
+            params.setDate(java.util.Date.from(currentTime.toInstant())); // Set the date for validation
 
             X509CertSelector certSelector = new X509CertSelector();
             certSelector.setCertificate(cert);
@@ -150,9 +151,11 @@ public class CertificateUtils {
             CertPathBuilder certPathBuilder = CertPathBuilder.getInstance("PKIX");
             PKIXBuilderParameters builderParams = new PKIXBuilderParameters(trustAnchors, certSelector);
             builderParams.setRevocationEnabled(false); // Disable revocation checking
+            builderParams.setDate(java.util.Date.from(currentTime.toInstant())); // Set the date for validation
 
             CertStore certStore = CertStore.getInstance("Collection", new CollectionCertStoreParameters(trustAnchors));
             builderParams.addCertStore(certStore);
+
 
             CertPath certPath = certPathBuilder.build(builderParams).getCertPath();
             

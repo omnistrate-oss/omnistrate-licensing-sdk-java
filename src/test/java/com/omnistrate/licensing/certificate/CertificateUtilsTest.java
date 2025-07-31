@@ -173,7 +173,7 @@ public class CertificateUtilsTest {
             assertNotNull(cert.getPublicKey());
 
             // get a valid time that is within the certificate's validity period
-            ZonedDateTime validTime = ZonedDateTime.ofInstant(cert.getNotBefore().toInstant(), ZoneOffset.UTC).plusHours(1);
+            ZonedDateTime validTime = ZonedDateTime.of(2025, 5, 1, 0, 0, 0, 0, ZoneOffset.UTC);
             assertTrue(CertificateUtils.verifyCertificate(cert, "licensing-test.omnistrate.dev", validTime));
             
             // Test expired certificate
