@@ -6,6 +6,7 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -103,6 +104,54 @@ public class CertificateUtilsTest {
     }
 
     @Test
+    public void testLoadCertificateFromString_R12() {
+        try {
+            X509Certificate cert = CertificateUtils.loadCertificateFromString(Certificates.R12);
+            assertNotNull(cert);
+            assertEquals("CN=R12,O=Let's Encrypt,C=US", cert.getSubjectX500Principal().getName());
+        } catch (Exception e) {
+            fail("Exception should not be thrown: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testLoadCertificateChainFromString_R12() {
+        try {
+            List<X509Certificate> certChain = CertificateUtils.loadCertificateChainFromString(Certificates.R12);
+            assertNotNull(certChain);
+            assertFalse(certChain.isEmpty());
+            assertEquals("CN=R12,O=Let's Encrypt,C=US", certChain.get(0).getSubjectX500Principal().getName());
+            assertTrue(certChain.size() == 1);
+        } catch (Exception e) {
+            fail("Exception should not be thrown: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testLoadCertificateFromString_R13() {
+        try {
+            X509Certificate cert = CertificateUtils.loadCertificateFromString(Certificates.R13);
+            assertNotNull(cert);
+            assertEquals("CN=R13,O=Let's Encrypt,C=US", cert.getSubjectX500Principal().getName());
+        } catch (Exception e) {
+            fail("Exception should not be thrown: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testLoadCertificateChainFromString_R13() {
+        try {
+            List<X509Certificate> certChain = CertificateUtils.loadCertificateChainFromString(Certificates.R13);
+            assertNotNull(certChain);
+            assertFalse(certChain.isEmpty());
+            assertEquals("CN=R13,O=Let's Encrypt,C=US", certChain.get(0).getSubjectX500Principal().getName());
+            assertTrue(certChain.size() == 1);
+        } catch (Exception e) {
+            fail("Exception should not be thrown: " + e.getMessage());
+        }
+    }
+
+    @Test
     public void testLoadPrivateKeyFromString() {
         try {
             PrivateKey privateKey = CertificateUtils.loadPrivateKeyFromString(TEST_PRIVATE_KEY);
@@ -164,7 +213,11 @@ public class CertificateUtilsTest {
     public void testLoadPublicCertificateFromBytes() {
         try {
             byte[] certBytes = TEST_CERTIFICATE.getBytes();
-            X509Certificate cert = CertificateUtils.loadCertificateFromBytes(certBytes);
+            List<X509Certificate> certChain = CertificateUtils.loadCertificateChainFromBytes(certBytes);
+            assertNotNull(certChain);
+            assertFalse(certChain.isEmpty());
+            
+            X509Certificate cert = certChain.get(0); // First cert is the end-entity certificate
             assertNotNull(cert);
 
             assertEquals("CN=R11,O=Let's Encrypt,C=US", cert.getIssuerX500Principal().getName());
@@ -174,13 +227,17 @@ public class CertificateUtilsTest {
 
             // get a valid time that is within the certificate's validity period
             ZonedDateTime validTime = ZonedDateTime.of(2025, 5, 1, 0, 0, 0, 0, ZoneOffset.UTC);
-            assertTrue(CertificateUtils.verifyCertificate(cert, "licensing-test.omnistrate.dev", validTime));
+            
+            // Use the intermediate certificates from the chain (all but the first one)
+            List<X509Certificate> intermediates = certChain.size() > 1 ? 
+                certChain.subList(1, certChain.size()) : java.util.Collections.emptyList();
+            assertTrue(CertificateUtils.verifyCertificate(cert, "licensing-test.omnistrate.dev", validTime, intermediates));
             
             // Test expired certificate
             ZonedDateTime expiredTime =  ZonedDateTime.ofInstant(cert.getNotAfter().toInstant(), ZoneOffset.UTC).plusHours(1);
-            assertThrows(Exception.class, () -> CertificateUtils.verifyCertificate(cert, "licensing-test.omnistrate.dev", expiredTime));
+            assertThrows(Exception.class, () -> CertificateUtils.verifyCertificate(cert, "licensing-test.omnistrate.dev", expiredTime, intermediates));
 
-            assertThrows(Exception.class, () -> CertificateUtils.verifyCertificate(cert, "licensing.omnistrate.dev.invalid", validTime));
+            assertThrows(Exception.class, () -> CertificateUtils.verifyCertificate(cert, "licensing.omnistrate.dev.invalid", validTime, intermediates));
         } catch (Exception e) {
             fail("Exception should not be thrown: " + e.getMessage());
         }

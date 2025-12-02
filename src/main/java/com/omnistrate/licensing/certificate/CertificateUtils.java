@@ -28,9 +28,7 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.security.cert.CertPathValidator;
 import java.security.cert.PKIXBuilderParameters;
-import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
-import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
 import java.security.cert.CertificateExpiredException;
@@ -65,6 +63,26 @@ public class CertificateUtils {
         }
     }
 
+    public static List<X509Certificate> loadCertificateChain(String certPath) throws InvalidCertificateException {
+        try (FileInputStream fis = new FileInputStream(new File(certPath))) {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            Collection<?> certs = cf.generateCertificates(fis);
+            List<X509Certificate> certList = new java.util.ArrayList<>();
+            for (Object cert : certs) {
+                if (cert instanceof X509Certificate) {
+                    certList.add((X509Certificate) cert);
+                }
+            }
+            return certList;
+        } catch (FileNotFoundException e) {
+            throw new InvalidCertificateException("Certificate file not found: " + certPath);
+        } catch (CertificateException e) {
+            throw new InvalidCertificateException("Failed to load certificate chain from file: " + certPath, e);
+        } catch (IOException e) {
+            throw new InvalidCertificateException("Failed to read certificate file: " + certPath, e);
+        }
+    }
+
     public static X509Certificate loadCertificateFromBytes(byte[] certBytes) throws InvalidCertificateException {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
@@ -74,8 +92,28 @@ public class CertificateUtils {
         }
     }
 
+    public static List<X509Certificate> loadCertificateChainFromBytes(byte[] certBytes) throws InvalidCertificateException {
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            Collection<?> certs = cf.generateCertificates(new ByteArrayInputStream(certBytes));
+            List<X509Certificate> certList = new java.util.ArrayList<>();
+            for (Object cert : certs) {
+                if (cert instanceof X509Certificate) {
+                    certList.add((X509Certificate) cert);
+                }
+            }
+            return certList;
+        } catch (CertificateException e) {
+            throw new InvalidCertificateException("Failed to load certificate chain from bytes", e);
+        }
+    }
+
     public static X509Certificate loadCertificateFromString(String certString) throws InvalidCertificateException {
         return loadCertificateFromBytes(certString.getBytes());
+    }
+
+    public static List<X509Certificate> loadCertificateChainFromString(String certString) throws InvalidCertificateException {
+        return loadCertificateChainFromBytes(certString.getBytes());
     }
 
     public static PrivateKey loadPrivateKeyFromBytes(byte[] pemContent) throws InvalidPrivateKeyException {
@@ -122,7 +160,7 @@ public class CertificateUtils {
         }
     }
 
-   public static boolean verifyCertificate(X509Certificate cert, String dnsName, ZonedDateTime currentTime) throws InvalidCertificateException {
+   public static boolean verifyCertificate(X509Certificate cert, String dnsName, ZonedDateTime currentTime, List<X509Certificate> intermediateCerts) throws InvalidCertificateException {
         // Check certificate validity date
         try {
             cert.checkValidity(java.util.Date.from(currentTime.toInstant()));
@@ -131,36 +169,60 @@ public class CertificateUtils {
         }
 
         try {
-            // Verify certificate against trust anchors
+            // Use only the root CA as the trust anchor
             Set<TrustAnchor> trustAnchors = new HashSet<>();
-            // Load CA and intermediate certificates from resources
-            X509Certificate caCert = loadCertificateFromString(Certificates.ISRGROOTX1);
-            trustAnchors.add(new TrustAnchor(caCert, null));
-            X509Certificate intermediateCert1 = loadCertificateFromString(Certificates.R10);
-            trustAnchors.add(new TrustAnchor(intermediateCert1, null));
-            X509Certificate intermediateCert2 = loadCertificateFromString(Certificates.R11);
-            trustAnchors.add(new TrustAnchor(intermediateCert2, null));
+            X509Certificate rootCert = loadCertificateFromString(Certificates.ISRGROOTX1);
+            trustAnchors.add(new TrustAnchor(rootCert, null));
 
-            PKIXParameters params = new PKIXParameters(trustAnchors);
-            params.setRevocationEnabled(false); // Disable revocation checking
-            params.setDate(java.util.Date.from(currentTime.toInstant())); // Set the date for validation
-
+            // Build certificate path by validating the certificate chain up to the trusted root
+            // This approach doesn't require hardcoding intermediate certificates as trust anchors
             X509CertSelector certSelector = new X509CertSelector();
             certSelector.setCertificate(cert);
 
-            CertPathBuilder certPathBuilder = CertPathBuilder.getInstance("PKIX");
             PKIXBuilderParameters builderParams = new PKIXBuilderParameters(trustAnchors, certSelector);
             builderParams.setRevocationEnabled(false); // Disable revocation checking
             builderParams.setDate(java.util.Date.from(currentTime.toInstant())); // Set the date for validation
 
-            CertStore certStore = CertStore.getInstance("Collection", new CollectionCertStoreParameters(trustAnchors));
-            builderParams.addCertStore(certStore);
+            // Add intermediate certificates to the cert store for path building
+            // This allows any intermediate certificate to be used for validation without hardcoding them as trust anchors
+            List<X509Certificate> certStoreList = new java.util.ArrayList<>();
+            
+            // Add commonly known Let's Encrypt intermediate certificates
+            // These are NOT trust anchors - they're just available for building the path to the root
+            // New intermediates can be added here without changing the validation logic
+            try {
+                certStoreList.add(loadCertificateFromString(Certificates.R10));
+                certStoreList.add(loadCertificateFromString(Certificates.R11));
+                certStoreList.add(loadCertificateFromString(Certificates.R12));
+                certStoreList.add(loadCertificateFromString(Certificates.R13));
+            } catch (InvalidCertificateException e) {
+                throw new InvalidCertificateException("Failed to load built-in intermediate certificates", e);
+            }
+            
+            // Add any additional intermediate certificates provided by the caller
+            if (!intermediateCerts.isEmpty()) {
+                certStoreList.addAll(intermediateCerts);
+            }
 
+            if (!certStoreList.isEmpty()) {
+                java.security.cert.CertStore certStore = java.security.cert.CertStore.getInstance(
+                    "Collection",
+                    new java.security.cert.CollectionCertStoreParameters(certStoreList)
+                );
+                builderParams.addCertStore(certStore);
+            }
 
+            // Build and validate the certificate path
+            CertPathBuilder certPathBuilder = CertPathBuilder.getInstance("PKIX");
             CertPath certPath = certPathBuilder.build(builderParams).getCertPath();
             
+            // Validate the certificate path
             CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX");
-            certPathValidator.validate(certPath, params);
+            PKIXParameters validationParams = new PKIXParameters(trustAnchors);
+            validationParams.setRevocationEnabled(false);
+            validationParams.setDate(java.util.Date.from(currentTime.toInstant()));
+            
+            certPathValidator.validate(certPath, validationParams);
         } catch (Exception e) {
             throw new InvalidCertificateException("Failed to validate certificate", e);
         }
