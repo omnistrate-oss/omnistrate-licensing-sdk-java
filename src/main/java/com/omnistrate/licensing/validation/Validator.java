@@ -12,22 +12,29 @@ import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 public class Validator {
 
-
     private X509Certificate cert;
+    private List<X509Certificate> intermediateCerts;
 
-    public Validator(X509Certificate cert) {
+    public Validator(X509Certificate cert, List<X509Certificate> intermediateCerts) {
         this.cert = cert;
+        this.intermediateCerts = intermediateCerts;
     }
 
     public Validator(byte[] certPEM) throws InvalidCertificateException {
-        this(CertificateUtils.loadCertificateFromBytes(certPEM));
+        List<X509Certificate> certChain = CertificateUtils.loadCertificateChainFromBytes(certPEM);
+        if (certChain.isEmpty()) {
+            throw new InvalidCertificateException("Certificate chain is empty");
+        }
+        this.cert = certChain.get(0);
+        this.intermediateCerts = certChain.subList(1, certChain.size());
     }
 
     public Validator(String certPath) throws InvalidCertificateException {
-        this(CertificateUtils.loadCertificate(certPath));
+        this(CertificateUtils.loadCertificate(certPath), java.util.Collections.emptyList());
     }
     
     public Validator(ValidatorConfig config) throws InvalidCertificateException {
@@ -102,7 +109,7 @@ public class Validator {
         }
 
         // Validate the certificate
-        return CertificateUtils.verifyCertificate(cert, certificateDomain, currentTime);
+        return CertificateUtils.verifyCertificate(cert, certificateDomain, currentTime, intermediateCerts);
     }
 
     public static boolean validateLicense(String organizationID, String productPlanUniqueID) throws InvalidLicenseException, InvalidCertificateException, InvalidSignatureException {

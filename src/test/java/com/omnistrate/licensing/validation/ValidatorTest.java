@@ -1,6 +1,7 @@
 package com.omnistrate.licensing.validation;
 
 import com.omnistrate.licensing.certificate.CertificateUtils;
+import com.omnistrate.licensing.certificate.Certificates;
 import com.omnistrate.licensing.common.InvalidLicenseException;
 import com.omnistrate.licensing.common.InvalidSignatureException;
 import com.omnistrate.licensing.common.License;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -97,7 +99,35 @@ public class ValidatorTest {
 
             LicenseEnvelope envelope = new LicenseEnvelope(license, signature);
 
-            Validator validator = new Validator(cert);
+            Validator validator = new Validator(cert, java.util.Collections.emptyList());
+            assertTrue(validator.validateLicense(envelope, "orgID", "SKU", "instance-1", now));
+            assertTrue(validator.validateLicense(envelope, "orgID", "SKU", "", now));
+            assertTrue(validator.validateLicense(envelope, "", "SKU", "", now));
+            assertTrue(validator.validateLicense(envelope, "", "", "", now));
+
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicense(envelope, "INVALID", "SKU", "instance-1", now));
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicense(envelope, "orgID", "INVALID", "instance-1", now));
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicense(envelope, "orgID", "SKU", "INVALID", now));
+        } catch (Exception e) {
+            fail("Exception should not be thrown: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testValidateLicenseChain() {
+        try {
+            ZonedDateTime now = ZonedDateTime.now();
+            X509Certificate cert = CertificateUtils.loadCertificateFromString(TEST_CERTIFICATE);
+            List<X509Certificate> intermediateCerts = CertificateUtils.loadCertificateChainFromString(Certificates.R11);
+            PrivateKey privateKey = CertificateUtils.loadPrivateKeyFromString(TEST_PRIVATE_KEY);
+
+            License license = new License("orgID", "SKU", "instance-1", "subs-1", "product a", now, now.plusDays(2));
+            byte[] licenseBytes = license.toBytes();
+            byte[] signature = CertificateUtils.sign(privateKey, licenseBytes);
+
+            LicenseEnvelope envelope = new LicenseEnvelope(license, signature);
+
+            Validator validator = new Validator(cert, intermediateCerts);
             assertTrue(validator.validateLicense(envelope, "orgID", "SKU", "instance-1", now));
             assertTrue(validator.validateLicense(envelope, "orgID", "SKU", "", now));
             assertTrue(validator.validateLicense(envelope, "", "SKU", "", now));
@@ -125,7 +155,36 @@ public class ValidatorTest {
             LicenseEnvelope envelope = new LicenseEnvelope(license, signature);
             String envelopeBase64 = envelope.toBase64();
 
-            Validator validator = new Validator(cert);
+            Validator validator = new Validator(cert, java.util.Collections.emptyList());
+            assertTrue(validator.validateLicenseBase64(envelopeBase64, "orgID", "SKU", "instance-1", now));
+            assertTrue(validator.validateLicenseBase64(envelopeBase64, "orgID", "SKU", "", now));
+            assertTrue(validator.validateLicenseBase64(envelopeBase64, "", "SKU", "", now));
+            assertTrue(validator.validateLicenseBase64(envelopeBase64, "", "", "", now));
+
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicenseBase64(envelopeBase64,  "INVALID", "SKU", "instance-1", now));
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicenseBase64(envelopeBase64, "orgID", "INVALID", "instance-1", now));
+            assertThrows(InvalidLicenseException.class, () -> validator.validateLicenseBase64(envelopeBase64, "orgID", "SKU", "INVALID", now));
+        } catch (Exception e) {
+            fail("Exception should not be thrown: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testValidateLicenseChainBase64() {
+        try {
+            ZonedDateTime now = ZonedDateTime.now();
+            X509Certificate cert = CertificateUtils.loadCertificateFromString(TEST_CERTIFICATE);
+            List<X509Certificate> intermediateCerts = CertificateUtils.loadCertificateChainFromString(Certificates.R11);
+            PrivateKey privateKey = CertificateUtils.loadPrivateKeyFromString(TEST_PRIVATE_KEY);
+
+            License license = new License("orgID", "SKU", "instance-1", "subs-1", "product a", now, now.plusDays(2));
+            byte[] licenseBytes = license.toBytes();
+            byte[] signature = CertificateUtils.sign(privateKey, licenseBytes);
+
+            LicenseEnvelope envelope = new LicenseEnvelope(license, signature);
+            String envelopeBase64 = envelope.toBase64();
+
+            Validator validator = new Validator(cert, intermediateCerts);
             assertTrue(validator.validateLicenseBase64(envelopeBase64, "orgID", "SKU", "instance-1", now));
             assertTrue(validator.validateLicenseBase64(envelopeBase64, "orgID", "SKU", "", now));
             assertTrue(validator.validateLicenseBase64(envelopeBase64, "", "SKU", "", now));
@@ -150,7 +209,7 @@ public class ValidatorTest {
 
             LicenseEnvelope envelope = new LicenseEnvelope(license, invalidSignature);
 
-            Validator validator = new Validator(cert);
+            Validator validator = new Validator(cert, java.util.Collections.emptyList());
             assertThrows(InvalidSignatureException.class, () -> validator.validateLicense(envelope, "orgID", "SKU", "instance-1", now));
         } catch (Exception e) {
             fail("Exception should not be thrown: " + e.getMessage());
