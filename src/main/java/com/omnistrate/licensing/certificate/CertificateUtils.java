@@ -63,6 +63,26 @@ public class CertificateUtils {
         }
     }
 
+    public static List<X509Certificate> loadCertificateChain(String certPath) throws InvalidCertificateException {
+        try (FileInputStream fis = new FileInputStream(new File(certPath))) {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            Collection<?> certs = cf.generateCertificates(fis);
+            List<X509Certificate> certList = new java.util.ArrayList<>();
+            for (Object cert : certs) {
+                if (cert instanceof X509Certificate) {
+                    certList.add((X509Certificate) cert);
+                }
+            }
+            return certList;
+        } catch (FileNotFoundException e) {
+            throw new InvalidCertificateException("Certificate file not found: " + certPath);
+        } catch (CertificateException e) {
+            throw new InvalidCertificateException("Failed to load certificate chain from file: " + certPath, e);
+        } catch (IOException e) {
+            throw new InvalidCertificateException("Failed to read certificate file: " + certPath, e);
+        }
+    }
+
     public static X509Certificate loadCertificateFromBytes(byte[] certBytes) throws InvalidCertificateException {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");

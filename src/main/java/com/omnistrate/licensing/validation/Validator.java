@@ -34,7 +34,12 @@ public class Validator {
     }
 
     public Validator(String certPath) throws InvalidCertificateException {
-        this(CertificateUtils.loadCertificate(certPath), java.util.Collections.emptyList());
+        List<X509Certificate> certChain = CertificateUtils.loadCertificateChain(certPath);
+        if (certChain.isEmpty()) {
+            throw new InvalidCertificateException("Certificate chain is empty");
+        }
+        this.cert = certChain.get(0);
+        this.intermediateCerts = certChain.subList(1, certChain.size());
     }
     
     public Validator(ValidatorConfig config) throws InvalidCertificateException {
